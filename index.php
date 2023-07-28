@@ -20,50 +20,52 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 <body>
 <div class="container">
-    <audio id="audio" src="fight.mp3"></audio>
+    <audio id="fight-song" src="fight.mp3"></audio>
+    <audio id="hadoudken-song" src="Haduken.mp3"></audio>
     <h1 class="animate__animated animate__rubberBand">Battle</h1>
-    <div id="prematch">
-        <form action="" method="post">
-            <div>
-                Joueur <br>
-                <div class="row">
-                    <div class="col-6">
-                        <label class="form-label">Name</label>
-                        <input required type="text" class="form-control" name="player[name]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Attaque</label>
-                        <input required type="number" class="form-control" name="player[attaque]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Mana</label>
-                        <input required type="number" class="form-control" name="player[mana]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Santé</label>
-                        <input required type="number" class="form-control" name="player[sante]">
+        <div id="prematch">
+            <form id='formFight' action="index.php" method="post">
+                <div>
+                    Joueur <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input required type="text" class="form-control" name="player[name]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Attaque</label>
+                            <input required type="number" class="form-control" value="100" name="player[attaque]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mana</label>
+                            <input required type="number" class="form-control" value="100" name="player[mana]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Santé</label>
+                            <input required type="number" class="form-control" value="100" name="player[sante]">
+                        </div>
                     </div>
                 </div>
-            </div>
-            <hr>
-            <div>
-                Adversaire <br>
-                <div class="row">
-                    <div class="col-6">
-                        <label class="form-label">Name</label>
-                        <input required type="text" class="form-control" name="adversaire[name]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Attaque</label>
-                        <input required type="number" class="form-control" name="adversaire[attaque]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Mana</label>
-                        <input required type="number" class="form-control" name="adversaire[mana]">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Santé</label>
-                        <input required type="number" class="form-control" name="adversaire[sante]">
+                <hr>
+                <div>
+                    Adversaire <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Name</label>
+                            <input required type="text" class="form-control" name="adversaire[name]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Attaque</label>
+                            <input required type="number" class="form-control" value="100" name="adversaire[attaque]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mana</label>
+                            <input required type="number" class="form-control" value="100" name="adversaire[mana]">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Santé</label>
+                            <input required type="number" class="form-control" value="100" name="adversaire[sante]">
+                        </div>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -80,7 +82,7 @@ require_once __DIR__ . '/vendor/autoload.php';
             <div class="position-relative float-end">
                 <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test"
                      alt="Avatar"
-                     class="avatar">
+                     class="avatar float-end">
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
 
                 </span>
@@ -115,9 +117,9 @@ require_once __DIR__ . '/vendor/autoload.php';
                 </li>
 
             </ul>
-            <form action="" method="post">
+            <form id='actionForm' action="index.php" method="post">
                 <div class="d-flex justify-content-center">
-                    <input name="attaque" type="submit" value="Attaquer">
+                    <input id="attaque" name="attaque" type="submit" value="Attaquer">
                     <input name="soin" type="submit" value="Se soigner">
                 </div>
                 <div class="d-flex justify-content-center">
@@ -125,7 +127,6 @@ require_once __DIR__ . '/vendor/autoload.php';
                 </div>
             </form>
         </div>
-
         <div id="Resultats">
             <h1>Résultat</h1>
             xxxx est le vainqueur !
@@ -137,15 +138,43 @@ require_once __DIR__ . '/vendor/autoload.php';
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelector("#figth").addEventListener("click", function (event) {
-            document.getElementById("figth").classList.add("animate__animated")
-            document.getElementById("figth").classList.add("animate__rubberBand")
-            setTimeout(function () {
-                document.getElementById("figth").classList.remove("animate__rubberBand");
-            }, 1000);
-            var audio = document.getElementById("audio");
-            audio.play();
-        })
+        let submitFight = document.querySelector("#figth");
+        if(submitFight) {
+            submitFight.addEventListener("click", function (event) {
+                event.preventDefault();
+                submitFight.classList.add("animate__animated");
+                submitFight.classList.add("animate__rubberBand");
+                setTimeout(function () {
+                    submitFight.classList.remove("animate__rubberBand");
+                }, 1000);
+                let fight_song = document.getElementById("fight-song");
+                fight_song.play();
+                setTimeout(function () {
+                    document.forms["formFight"].submit();
+                }, 500);
+            })
+        }
+
+        let submitAttaque = document.querySelector("#attaque");
+        let alreadyPlaySong = false;
+        if(submitAttaque) {
+            submitAttaque.addEventListener("click", function (event) {
+                if(alreadyPlaySong)
+                    return true;
+                event.preventDefault();
+                submitAttaque.classList.add("animate__animated");
+                submitAttaque.classList.add("animate__rubberBand");
+                setTimeout(function () {
+                    submitAttaque.classList.remove("animate__rubberBand");
+                }, 1000);
+                let hadouken_song = document.getElementById("hadoudken-song");
+                hadouken_song.play();
+                alreadyPlaySong = true;
+                setTimeout(function () {
+                    submitAttaque.click();
+                }, 1000);
+            })
+        }
     });
 
 </script>
