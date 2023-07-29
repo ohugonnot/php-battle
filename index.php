@@ -22,6 +22,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 <div class="container">
     <audio id="fight-song" src="fight.mp3"></audio>
     <audio id="hadoudken-song" src="Haduken.mp3"></audio>
+    <audio id="fatality-song" src="fatality.mp3"></audio>
     <h1 class="animate__animated animate__rubberBand">Battle</h1>
         <div id="prematch">
             <form id='formFight' action="index.php" method="post">
@@ -70,17 +71,16 @@ require_once __DIR__ . '/vendor/autoload.php';
                 </div>
                 <div class="row mt-2">
                     <div class="d-flex justify-content-center">
-                        <input id="figth" type="submit" value="FIGHT">
+                        <input id="fight" type="submit" value="FIGHT">
                     </div>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
     <div id="match" class="row gx-5">
         <h2>Match</h2>
-        <div class="col-6 " id="player">
+        <div class="col-6 ">
             <div class="position-relative float-end">
-                <img src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test"
+                <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=test"
                      alt="Avatar"
                      class="avatar float-end">
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -123,7 +123,7 @@ require_once __DIR__ . '/vendor/autoload.php';
                     <input name="soin" type="submit" value="Se soigner">
                 </div>
                 <div class="d-flex justify-content-center">
-                    <input name="restart" type="submit" value="Stopper le combat">
+                    <input id="restart" name="restart" type="submit" value="Stopper le combat">
                 </div>
             </form>
         </div>
@@ -138,7 +138,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        let submitFight = document.querySelector("#figth");
+        let submitFight = document.querySelector("#fight");
         if(submitFight) {
             submitFight.addEventListener("click", function (event) {
                 event.preventDefault();
@@ -162,10 +162,14 @@ require_once __DIR__ . '/vendor/autoload.php';
                 if(alreadyPlaySong)
                     return true;
                 event.preventDefault();
+                let player = document.querySelector("#player")
+                player.classList.add("animate__animated");
+                player.classList.add("animate__rubberBand");
                 submitAttaque.classList.add("animate__animated");
                 submitAttaque.classList.add("animate__rubberBand");
                 setTimeout(function () {
                     submitAttaque.classList.remove("animate__rubberBand");
+                    player.classList.remove("animate__rubberBand");
                 }, 1000);
                 let hadouken_song = document.getElementById("hadoudken-song");
                 hadouken_song.play();
@@ -173,6 +177,22 @@ require_once __DIR__ . '/vendor/autoload.php';
                 setTimeout(function () {
                     submitAttaque.click();
                 }, 1000);
+            })
+        }
+
+        let submitRestart = document.querySelector("#restart");
+        let alreadyPlaySongRestart = false;
+        if(submitRestart) {
+            submitRestart.addEventListener("click", function (event) {
+                if(alreadyPlaySongRestart)
+                    return true;
+                event.preventDefault();
+                let fatality_song = document.getElementById("fatality-song");
+                fatality_song.play();
+                alreadyPlaySongRestart = true;
+                setTimeout(function () {
+                    submitRestart.click();
+                }, 2000);
             })
         }
     });
