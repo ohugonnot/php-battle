@@ -15,11 +15,18 @@ class Player
     }
     public function attack(Player $player)
     {
-        $damage = $this->power;
-        echo "$this->name attaque $player->name et lui inflige $damage de dégats";
+        $damage = $this->power / 20;
+        echo "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
         $player->loseHealth($damage);
-        // $player->attack($this);
+        $player->counterAttack($this);
+        dump($player);
         return $player->health;
+    }
+    public function counterAttack($player)
+    {
+        $damage = $player->power / 20;
+        $this->health -= $damage;
+        echo " \r \n $player->name réplique et inflige $damage de dégat à $this->name.";
     }
 
     public function loseHealth($damage)
