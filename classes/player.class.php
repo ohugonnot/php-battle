@@ -15,31 +15,31 @@ class Player
     }
     public function attack(Player $player)
     {
-        $damage = $this->power / 20;
+        $damage = $this->power / 2;
+        $player->health -= $damage;
         echo "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
-        $player->loseHealth($damage);
-        $player->counterAttack($this);
-        dump($player);
-        return $player->health;
-    }
-    public function counterAttack($player)
-    {
-        $damage = $player->power / 20;
-        $this->health -= $damage;
-        echo " \r \n $player->name réplique et inflige $damage de dégat à $this->name.";
+        $this->getLifeStatus();
+        // $damage = $player->power / 20;
+        // $this->health -= $damage;
+        // echo " \r \n $player->name réplique et inflige $damage de dégat à $this->name.";
     }
 
-    public function loseHealth($damage)
+
+    public function cure()
     {
-        $this->health -= $damage;
+        $this->health += ($this->mana / 20);
+        $this->mana /= 3;
         return $this;
     }
 
-    public function cure($mana)
+    public function getLifeStatus()
     {
-        $this->health += ($mana / 20);
-        $mana /= 3;
-        return $this;
+        if ($this->health > 0) {
+            return true;
+        } else {
+            echo 'you are dead';
+            return false;
+        }
     }
     public function die()
     {
@@ -64,11 +64,7 @@ class Fight
         $this->player1 = $player1;
         $this->player2 = $player2;
     }
-    public function watchHealth()
-    {
-        if ($this->player1->health <= 0 || $this->player2->health <= 0) {
-        }
-    }
+
     public function stopMatch()
     {
     }
