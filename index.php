@@ -6,7 +6,6 @@ $playerOnePower = 100;
 $playerOneMana = 100;
 $playerOneHealth = 100;
 $playerOne = new Player($playerOneName, $playerOnePower, $playerOneMana, $playerOneHealth);
-$playerOne->test();
 dump($playerOne);
 
 $playerTwoName = "Batman";
@@ -14,8 +13,8 @@ $playerTwoPower = 100;
 $playerTwoMana = 100;
 $playerTwoHealth = 100;
 $playerTwo = new Player($playerTwoName, $playerTwoPower, $playerTwoMana, $playerTwoHealth);
-$playerTwo->test();
 dump($playerTwo);
+$playerOne->attack($playerTwo);
 
 ?>
 
