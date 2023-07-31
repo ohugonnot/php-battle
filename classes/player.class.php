@@ -5,6 +5,7 @@ class Player
     public float $power;
     public float $mana;
     public float $health;
+    public string $comment;
 
     public function __construct(string $name, int $power, int $mana, int $health)
     {
@@ -17,8 +18,7 @@ class Player
     {
         $damage = $this->power / 4;
         $player->health -= $damage;
-        echo "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
-        $this->getLifeStatus();
+        $this->comment = "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
         // $damage = $player->power / 20;
         // $this->health -= $damage;
         // echo " \r \n $player->name réplique et inflige $damage de dégat à $this->name.";
@@ -27,30 +27,17 @@ class Player
 
     public function cure()
     {
-        $this->health += ($this->mana / 20);
-        $this->mana /= 4;
-        echo "$this->name s'est soigné";
-        return $this;
-    }
+        if ($this->mana > 0) {
 
-    public function getLifeStatus()
-    {
-        if ($this->health > 0) {
-            return true;
+            $this->health += (($this->mana / 20) + 10);
+            $this->mana /= 4;
+            $this->mana -= 1;
+            $this->comment = "$this->name s'est soigné";
+            return $this;
         } else {
-            echo 'you are dead';
+            $this->comment = "$this->name n'a plus assez de mana pour se soigner";
             return false;
         }
-    }
-    public function die()
-    {
-        if ($this->health <= 0) {
-            $this->lose();
-        }
-    }
-    public function lose()
-    {
-        echo 'You lose ahahah';
     }
 }
 

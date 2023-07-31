@@ -3,6 +3,14 @@ require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
 session_start();
+if (isset($_SESSION['player1'])) {
+    $playerOne = $_SESSION['player1'];
+    $playerTwo = $_SESSION['player2'];
+    if (($playerOne->health < 0) || ($playerTwo->health < 0)) {
+        echo "end of game";
+        header('Location: ./resultat.php');
+    }
+}
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
 
     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
@@ -10,7 +18,6 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isse
     $_SESSION['player1'] = $playerOne;
     $_SESSION['player2'] = $playerTwo;
 }
-dump($_SESSION);
 // $_SESSION['fight'] = true;
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     $playerOne = $_SESSION['player1'];
@@ -18,23 +25,40 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     // while ($playerOne->getLifeStatus() && $playerTwo->getLifeStatus())
     $playerOne->attack($playerTwo);
     $_SESSION['player2'] = $playerTwo;
-    $playerTwo->getLifeStatus();
+
+    if ($playerTwo->health < 0) {
+        echo "end of game";
+        header('Location: ./resultat.php');
+    }
     if ($playerTwo->health < 30) {
-        $playerTwo->cure();
+        $iscured = $playerTwo->cure();
+        if ($iscured === false) {
+            $playerTwo->attack();
+        }
     } else {
         $playerTwo->attack($playerOne);
         $_SESSION['player1'] = $playerOne;
-        $playerOne->getLifeStatus();
+        if ($playerOne->health < 0) {
+            echo "end of game";
+            header('Location: ./resultat.php');
+        }
     }
-
-    dump($playerOne, $playerTwo);
 }
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
     $playerOne = $_SESSION['player1'];
     $playerTwo = $_SESSION['player2'];
-    $playerOne->cure();
-    $playerTwo->attack($playerOne);
-    dump($playerOne, $playerTwo);
+    $isCured = $playerOne->cure();
+    if ($isCured === false) {
+        return;
+    } else {
+        $playerTwo->attack($playerOne);
+        $_SESSION['player1'] = $playerOne;
+
+        if ($playerOne->health < 0) {
+            echo "end of game";
+            header('Location: ./resultat.php');
+        }
+    }
 }
 ?>
 
@@ -72,8 +96,11 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
         <h2>Combat</h2>
         <ul>
 
-            <li>
-                <i class="fa-solid fa-khanda p-1"></i> test
+
+            <?php if (isset($playerOne->comment)) { ?>
+                <li><i class="fa-solid fa-khanda p-1"><?= $playerOne->comment ?></i></li><?php } ?>
+            <?php if (isset($playerTwo->comment)) { ?>
+                <li><i class="fa-solid fa-khanda p-1"><?= $playerTwo->comment ?></i></li><?php } ?>
             </li>
 
         </ul>

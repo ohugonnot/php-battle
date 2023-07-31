@@ -1,9 +1,27 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+// require './index.php';
+require './classes/player.class.php';
+session_start();
+$playerOne = $_SESSION['player1'];
+$playerTwo = $_SESSION['player2'];
+dump($playerOne, $playerTwo);
 ?>
 <div id="Resultats">
     <h1>Résultat</h1>
-    xxxx est le vainqueur !
-    <form class="d-flex justify-content-center" action="" method="post">
+    <?php
+    if (($playerOne->health) > ($playerTwo->health)) {
+        echo "$playerOne->name est le vainqueur";
+
+        session_destroy();
+    } else {
+        echo "$playertwo->name est le vainqueur";
+
+        session_destroy();
+    }
+
+    ?>
+    <form class="d-flex justify-content-center" action="./index.php" method="post">
         <input name="restart" type="submit" value="Nouveau combat">
     </form>
 </div>

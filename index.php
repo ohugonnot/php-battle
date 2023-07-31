@@ -2,32 +2,6 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require './classes/player.class.php';
 session_start();
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
-    // $playerOne->attack($playerTwo);
-    $playerOne = new Player($_SESSION['player_name'], $_SESSION['player_attaque'], $_SESSION['player_mana'], $_SESSION['player_sante']);
-    $playerTwo = new Player($_SESSION['adversaire_name'], $_SESSION['adversaire_attaque'], $_SESSION['adversaire_mana'], $_SESSION['adversaire_sante']);
-    $_SESSION['player1'] = $playerOne;
-    $_SESSION['player2'] = $playerTwo;
-
-    dump($playerOne, $playerTwo);
-    dump($_SESSION);
-}
-
-// $playerOneName = "Superman";
-// $playerOnePower = 100;
-// $playerOneMana = 100;
-// $playerOneHealth = 100;
-// $playerOne = new Player($playerOneName, $playerOnePower, $playerOneMana, $playerOneHealth);
-// dump($playerOne);
-
-// $playerTwoName = "Batman";
-// $playerTwoPower = 100;
-// $playerTwoMana = 100;
-// $playerTwoHealth = 100;
-// $playerTwo = new Player($playerTwoName, $playerTwoPower, $playerTwoMana, $playerTwoHealth);
-// $playerOne->attack($playerTwo);
-// dump($playerOne, $playerTwo);
 
 
 ?>
