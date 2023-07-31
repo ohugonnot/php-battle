@@ -14,6 +14,11 @@ dump($playerOne, $playerTwo);
         echo "$playerOne->name est le vainqueur";
 
         session_destroy();
+    }
+    if (($playerOne->health) === ($playerTwo->health)) {
+        echo "Match nul !!!";
+
+        session_destroy();
     } else {
         echo "$playertwo->name est le vainqueur";
 
