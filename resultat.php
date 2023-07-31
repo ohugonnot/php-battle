@@ -12,18 +12,16 @@ dump($playerOne, $playerTwo);
     <?php
     if (($playerOne->health) > ($playerTwo->health)) {
         echo "$playerOne->name est le vainqueur";
-
-        session_destroy();
+    }
+    if (($playerOne->health) < ($playerTwo->health)) {
+        echo "$playerTwo->name est le vainqueur";
     }
     if (($playerOne->health) === ($playerTwo->health)) {
         echo "Match nul !!!";
-
-        session_destroy();
-    } else {
-        echo "$playertwo->name est le vainqueur";
-
-        session_destroy();
     }
+
+
+    session_destroy();
 
     ?>
     <form class="d-flex justify-content-center" action="./index.php" method="post">
