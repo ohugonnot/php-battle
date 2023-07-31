@@ -3,7 +3,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 // require './index.php';
 require './classes/player.class.php';
 session_start();
-if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque'])) {
+if (($_SERVER['REQUEST_METHOD'] == 'POST') && !isset($_POST['attaque']) && !isset($_POST['soin'])) {
 
     $playerOne = new Player($_POST['player-name'], $_POST['player-attaque'], $_POST['player-mana'], $_POST['player-sante']);
     $playerTwo = new Player($_POST['adversaire-name'], $_POST['adversaire-attaque'], $_POST['adversaire-mana'], $_POST['adversaire-sante']);
@@ -19,14 +19,21 @@ if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['attaque'])) {
     $playerOne->attack($playerTwo);
     $_SESSION['player2'] = $playerTwo;
     $playerTwo->getLifeStatus();
-    $playerTwo->attack($playerOne);
-    $_SESSION['player1'] = $playerOne;
-    $playerOne->getLifeStatus();
+    if ($playerTwo->health < 30) {
+        $playerTwo->cure();
+    } else {
+        $playerTwo->attack($playerOne);
+        $_SESSION['player1'] = $playerOne;
+        $playerOne->getLifeStatus();
+    }
 
     dump($playerOne, $playerTwo);
 }
 if (($_SERVER['REQUEST_METHOD'] == 'POST') && isset($_POST['soin'])) {
+    $playerOne = $_SESSION['player1'];
+    $playerTwo = $_SESSION['player2'];
     $playerOne->cure();
+    $playerTwo->attack($playerOne);
     dump($playerOne, $playerTwo);
 }
 ?>

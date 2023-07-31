@@ -2,9 +2,9 @@
 class Player
 {
     public string $name;
-    public int $power;
-    public int $mana;
-    public int $health;
+    public float $power;
+    public float $mana;
+    public float $health;
 
     public function __construct(string $name, int $power, int $mana, int $health)
     {
@@ -15,7 +15,7 @@ class Player
     }
     public function attack(Player $player)
     {
-        $damage = $this->power / 2;
+        $damage = $this->power / 4;
         $player->health -= $damage;
         echo "$this->name attaque $player->name et lui inflige $damage de dégats  \r \n";
         $this->getLifeStatus();
@@ -28,7 +28,8 @@ class Player
     public function cure()
     {
         $this->health += ($this->mana / 20);
-        $this->mana /= 3;
+        $this->mana /= 4;
+        echo "$this->name s'est soigné";
         return $this;
     }
 
