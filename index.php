@@ -3,21 +3,14 @@ require_once __DIR__ . '/vendor/autoload.php';
 require "lib.php";
 session_start();
 
-list($player, $adversaire, $combats) = getInfoInSession();
-
-$combatIsBegin = false;
-$formErrors = [];
-
-// CONTROLLER
+// CONTROLLER gestion de la logique
 // Gestion de mon formulaire de création de personnage
 if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["fight"])) {
     list($formErrors, $player, $adversaire) = checkErrorsForm();
     if (empty($formErrors)) {
-        $_SESSION["player"] = $player;
-        $_SESSION["adversaire"] = $adversaire;
+        setInfoInSession($player, $adversaire, []);
     }
 }
-
 
 if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["attaque"])) {
     attaque();
@@ -74,69 +67,67 @@ $combatIsBegin = $player && $adversaire;
                         <div class="col-6">
                             <label class="form-label">Name</label>
                             <input required type="text" class="form-control" name="player[name]"
-                                   value="<?php if (isset($_POST["player"]["name"])) {
-                                       echo $_POST["player"]["name"];
-                                   } else {
-                                       echo "";
-                                   } ?>">
+                                   value="<?php echo $_POST["player"]["name"] ?? "" ?>">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Attaque</label>
                             <input required type="number"
-                                   class="form-control <?php if (isset($formErrors["player"]["attaque"])) {
-                                       echo "is-invalid";
-                                   } ?>" name="player[attaque]"
-                                   value="<?php if (isset($_POST["player"]["attaque"])) {
-                                       echo $_POST["player"]["attaque"];
-                                   } else {
-                                       echo "100";
-                                   } ?>">
+                                   class="form-control <?php echo isset($formErrors["player"]["attaque"]) ? "is-invalid" : "" ?>"
+                                   name="player[attaque]"
+                                   value="<?php echo $_POST["player"]["attaque"] ?? "100" ?>">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Mana</label>
                             <input required type="number"
-                                   class="form-control <?php if (isset($formErrors["player"]["mana"])) {
-                                       echo "is-invalid";
-                                   } ?>" name="player[mana]"
-                                   value="<?php if (isset($_POST["player"]["mana"])) {
-                                       echo $_POST["player"]["mana"];
-                                   } else {
-                                       echo "100";
-                                   } ?>">
+                                   class="form-control <?php echo isset($formErrors["player"]["mana"]) ? "is-invalid" : "" ?>"
+                                   name="player[mana]"
+                                   value="<?php echo $_POST["player"]["mana"] ?? "100" ?>">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Santé</label>
                             <input required type="number"
-                                   class="form-control <?php if (isset($formErrors["player"]["sante"])) {
-                                       echo "is-invalid";
-                                   } ?>" name="player[sante]"
-                                   value="<?php if (isset($_POST["player"]["sante"])) {
-                                       echo $_POST["player"]["sante"];
-                                   } else {
-                                       echo "100";
-                                   } ?>">
+                                   class="form-control <?php echo isset($formErrors["player"]["sante"]) ? "is-invalid" : "" ?>"
+                                   name="player[sante]"
+                                   value="<?php echo $_POST["player"]["sante"] ?? "100" ?>">
                         </div>
                     </div>
                 </div>
                 <hr>
                 <div>
                     Adversaire <br>
+                    <div class="errors">
+                        <ul>
+                            <?php foreach ($formErrors["adversaire"] ?? [] as $error) { ?>
+                                <li class="text-danger"><?php echo $error ?></li>
+                            <?php } ?>
+                        </ul>
+                    </div>
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label">Name</label>
-                            <input required type="text" class="form-control" name="adversaire[name]">
+                            <input required type="text" class="form-control" name="adversaire[name]"
+                                   value="<?php echo $_POST["adversaire"]["name"] ?? "" ?>">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Attaque</label>
-                            <input required type="number" class="form-control" value="100" name="adversaire[attaque]">
+                            <input required type="number"
+                                   class="form-control <?php echo isset($formErrors["adversaire"]["attaque"]) ? "is-invalid" : "" ?>"
+                                   name="adversaire[attaque]"
+                                   value="<?php echo $_POST["adversaire"]["attaque"] ?? "100" ?>">
                         </div>
                         <div class="col-6">
                             <label class="form-label">Mana</label>
-                            <input required type="number" class="form-control" value="100" name="adversaire[mana]">
+                            <input required type="number"
+                                   class="form-control <?php echo isset($formErrors["adversaire"]["mana"]) ? "is-invalid" : "" ?>"
+                                   name="adversaire[mana]"
+                                   value="<?php echo $_POST["adversaire"]["mana"] ?? "100" ?>">
                         </div>
-                        <div class="col-6">
+                        <div class=" col-6">
                             <label class="form-label">Santé</label>
-                            <input required type="number" class="form-control" value="100" name="adversaire[sante]">
+                            <input required type="number"
+                                   class="form-control <?php echo isset($formErrors["adversaire"]["sante"]) ? "is-invalid" : "" ?>"
+                                   name="adversaire[sante]"
+                                   value="<?php echo $_POST["adversaire"]["sante"] ?? "100" ?>">
                         </div>
                     </div>
                 </div>
@@ -152,7 +143,8 @@ $combatIsBegin = $player && $adversaire;
             <h2>Match</h2>
             <div class="col-6 ">
                 <div class="position-relative float-end">
-                    <img id="player" src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=test"
+                    <img id="player"
+                         src="https://api.dicebear.com/6.x/lorelei/svg?flip=false&seed=<?php echo $player["name"] ?>"
                          alt="Avatar"
                          class="avatar float-end">
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -167,7 +159,8 @@ $combatIsBegin = $player && $adversaire;
             </div>
             <div class="col-6">
                 <div class="position-relative float-start">
-                    <img id="adversaire" src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=test2"
+                    <img id="adversaire"
+                         src="https://api.dicebear.com/6.x/lorelei/svg?flip=true&seed=<?php echo $adversaire["name"] ?>"
                          alt="Avatar"
                          class="avatar">
                     <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
