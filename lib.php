@@ -31,10 +31,12 @@ function checkErrorsForm(): array
     $player["sante"] = intval($player["sante"]);
     $player["mana"] = intval($player["mana"]);
     $player["attaque"] = intval($player["attaque"]);
+    $player["initial_life"] = $player["sante"];
     $adversaire["name"] = trim($adversaire["name"]);
     $adversaire["sante"] = intval($adversaire["sante"]);
     $adversaire["mana"] = intval($adversaire["mana"]);
     $adversaire["attaque"] = intval($adversaire["attaque"]);
+    $adversaire["initial_life"] = $adversaire["sante"];
 
     $format = '%s %s doit être superieur à %d.';
     if ($player["attaque"] <= 0) {
@@ -65,17 +67,43 @@ function attaque()
     // getInfo
     list($player, $adversaire, $combats) = getInfoInSession();
 
-    //logique
+    // Jutilise max pour ne pas descendre la vie en dessous de zero
     $adversaire['sante'] = max(0, $adversaire['sante'] - $player["attaque"]);
+    $combats[] = $player["name"] . " attaque " . $adversaire["name"] . " et lui inflige " . $player["attaque"] . " de degats.";
 
-    // Save info
     setInfoInSession($player, $adversaire, $combats);
-    adversaireAction();
+    // Si l'adversaire n'est pas mort le faire riposter
+    if ($adversaire["sante"] <= 0) {
+        $combats[] = $player["name"] . " a tué " . $adversaire["name"] . " c'est la fin de la partie";
+        setInfoInSession($player, $adversaire, $combats);
+        $_SESSION["winner"] = $player["name"];
+    } else {
+        adversaireAction();
+    }
 }
 
 function adversaireAction()
 {
     list($player, $adversaire, $combats) = getInfoInSession();
+
+    $random = rand(0, 100);
+    // 25% de chance de se soigner s'il reste de la mana
+    if ($random <= 25 && $adversaire["mana"] > 0) {
+        $soin = round(25 / 100 * $adversaire['initial_life']);
+        $adversaire['sante'] = min($adversaire["initial_life"], $adversaire['sante'] + $soin);
+        $adversaire["mana"] -= 25;
+        $combats[] = $adversaire["name"] . " se soigne et restaure " . $soin . " points de vie.";
+    } // sinon on attaque
+    else {
+        $player['sante'] = max(0, $player['sante'] - $adversaire["attaque"]);
+        $combats[] = $adversaire["name"] . " attaque " . $player["name"] . " et lui inflige " . $adversaire["attaque"] . " de degats.";
+
+        if ($player["sante"] <= 0) {
+            $combats[] = $adversaire["name"] . " a tué " . $player["name"] . " c'est la fin de la partie";
+            setInfoInSession($player, $adversaire, $combats);
+            $_SESSION["winner"] = $adversaire["name"];
+        }
+    }
 
     setInfoInSession($player, $adversaire, $combats);
 }
@@ -83,6 +111,12 @@ function adversaireAction()
 function soin()
 {
     list($player, $adversaire, $combats) = getInfoInSession();
+
+    $soin = round(25 / 100 * $player['initial_life']);
+    // je ne peux pas me soigner plus que ma vie du départ.
+    $player['sante'] = min($player["initial_life"], $player['sante'] + $soin);
+    $player["mana"] -= 25;
+    $combats[] = $player["name"] . " se soigne et restaure " . $soin . " points de vie.";
 
     setInfoInSession($player, $adversaire, $combats);
     adversaireAction();

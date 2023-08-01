@@ -28,6 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["restart"])) {
 // GESTION DE LA VUE
 list($player, $adversaire, $combats) = getInfoInSession();
 $combatIsBegin = $player && $adversaire;
+$winner = $_SESSION["winner"] ?? null;
 ?>
 
 <html lang="fr">
@@ -88,7 +89,7 @@ $combatIsBegin = $player && $adversaire;
                             <input required type="number"
                                    class="form-control <?php echo isset($formErrors["player"]["sante"]) ? "is-invalid" : "" ?>"
                                    name="player[sante]"
-                                   value="<?php echo $_POST["player"]["sante"] ?? "100" ?>">
+                                   value="<?php echo $_POST["player"]["sante"] ?? "1000" ?>">
                         </div>
                     </div>
                 </div>
@@ -127,7 +128,7 @@ $combatIsBegin = $player && $adversaire;
                             <input required type="number"
                                    class="form-control <?php echo isset($formErrors["adversaire"]["sante"]) ? "is-invalid" : "" ?>"
                                    name="adversaire[sante]"
-                                   value="<?php echo $_POST["adversaire"]["sante"] ?? "100" ?>">
+                                   value="<?php echo $_POST["adversaire"]["sante"] ?? "1000" ?>">
                         </div>
                     </div>
                 </div>
@@ -175,30 +176,34 @@ $combatIsBegin = $player && $adversaire;
             </div>
             <div id="combats">
                 <h2>Combat</h2>
-                <ul>
-
-                    <li>
-                        <i class="fa-solid fa-khanda p-1"></i> test
-                    </li>
-
+                <ul style="max-height: 300px; overflow: auto">
+                    <?php foreach (array_reverse($combats) ?? [] as $combat) { ?>
+                        <li>
+                            <i class="fa-solid fa-khanda p-1"></i><?php echo $combat ?>
+                        </li>
+                    <?php } ?>
                 </ul>
-                <form id='actionForm' action="index.php" method="post">
-                    <div class="d-flex justify-content-center">
-                        <input name="attaque" type="submit" value="Attaquer">
-                        <input name="soin" type="submit" value="Se soigner">
-                    </div>
-                    <div class="d-flex justify-content-center">
-                        <input name="restart" type="submit" value="Stopper le combat">
-                    </div>
-                </form>
+                <?php if (!$winner) { ?>
+                    <form id='actionForm' action="index.php" method="post">
+                        <div class="d-flex justify-content-center">
+                            <input name="attaque" type="submit" value="Attaquer">
+                            <input name="soin" type="submit" value="Se soigner">
+                        </div>
+                        <div class="d-flex justify-content-center">
+                            <input name="restart" type="submit" value="Stopper le combat">
+                        </div>
+                    </form>
+                <?php } ?>
             </div>
-            <div id="Resultats">
-                <h1>Résultat</h1>
-                xxxx est le vainqueur !
-                <form class="d-flex justify-content-center" action="" method="post">
-                    <input name="restart" type="submit" value="Nouveau combat">
-                </form>
-            </div>
+            <?php if ($winner) { ?>
+                <div id="Resultats">
+                    <h1>Résultat</h1>
+                    <?php echo $winner ?> est le vainqueur !
+                    <form class="d-flex justify-content-center" action="" method="post">
+                        <input name="restart" type="submit" value="Nouveau combat">
+                    </form>
+                </div>
+            <?php } ?>
         </div>
     <?php } ?>
 </div>
