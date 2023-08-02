@@ -222,11 +222,12 @@ $winner = $_SESSION["winner"] ?? null;
                 <?php if (!$winner) { ?>
                     <form id='actionForm' action="index.php" method="post">
                         <div class="d-flex justify-content-center">
-                            <input name="attaque" type="submit" value="Attaquer">
-                            <input name="soin" type="submit" value="Se soigner">
+                            <input class="btn btn-outline-danger" name="attaque" type="submit" value="Attaquer">
+                            <input class="btn btn-outline-success" name="soin" type="submit" value="Se soigner">
                         </div>
                         <div class="d-flex justify-content-center">
-                            <input name="restart" type="submit" value="Stopper le combat">
+                            <input class="btn btn-outline-warning" name="restart" type="submit"
+                                   value="Stopper le combat">
                         </div>
                     </form>
                 <?php } ?>
@@ -236,7 +237,7 @@ $winner = $_SESSION["winner"] ?? null;
                     <h1>Résultat</h1>
                     <?php echo $winner ?> est le vainqueur !
                     <form class="d-flex justify-content-center" action="" method="post">
-                        <input name="restart" type="submit" value="Nouveau combat">
+                        <input class="btn btn-outline-warning" name="restart" type="submit" value="Nouveau combat">
                     </form>
                 </div>
             <?php } ?>
