@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["soin"])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["restart"])) {
-    restart();
+    removeInfoInSession();
 }
 
 

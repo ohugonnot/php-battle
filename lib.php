@@ -17,9 +17,8 @@ function setInfoInSession(?array $player, ?array $adversaire, ?array $combat): v
 
 function removeInfoInSession(): void
 {
-    unset($_SESSION["player"]);
-    unset($_SESSION["adversaire"]);
-    unset($_SESSION["combats"]);
+    session_abort();
+    $_SESSION = [];
 }
 
 function checkErrorsForm(): array
@@ -120,10 +119,4 @@ function soin()
 
     setInfoInSession($player, $adversaire, $combats);
     adversaireAction();
-}
-
-function restart()
-{
-    removeInfoInSession();
-    session_destroy();
 }
