@@ -36,9 +36,7 @@ $winner = $_SESSION["winner"] ?? null;
     <title>Battle</title>
     <link rel="stylesheet" href="public/bootstrap.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
-            integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
-            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
     <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
@@ -51,12 +49,39 @@ $winner = $_SESSION["winner"] ?? null;
     <audio id="fight-song" src="fight.mp3"></audio>
     <audio id="hadoudken-song" src="Haduken.mp3"></audio>
     <audio id="fatality-song" src="fatality.mp3"></audio>
-    <h1 class="animate__animated animate__rubberBand">Battle</h1>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Battle</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="statistiques.php">Statistiques</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <?php if (!$combatIsBegin) { ?>
         <div id="prematch">
             <form id='formFight' action="index.php" method="post">
-                <div>
+                <div class="row">
                     Joueur <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Sélectionner un joueur existant</label>
+                            <select class="form-select" name="player[id]" id="selectPlayer">
+                                <option selected value></option>
+                                <option value="1">Batman</option>
+                                <option value="2">Superman</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">ou créer votre propre joueur</div>
                     <div class="errors">
                         <ul>
                             <?php foreach ($formErrors["player"] ?? [] as $error) { ?>
@@ -94,8 +119,19 @@ $winner = $_SESSION["winner"] ?? null;
                     </div>
                 </div>
                 <hr>
-                <div>
+                <div class="row">
                     Adversaire <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Sélectionner un adversaire existant</label>
+                            <select class="form-select" name="adversaire[id]" id="selectAdversaire">
+                                <option selected value></option>
+                                <option value="1">Batman</option>
+                                <option value="2">Superman</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">ou créer votre propre adversaire</div>
                     <div class="errors">
                         <ul>
                             <?php foreach ($formErrors["adversaire"] ?? [] as $error) { ?>
@@ -134,7 +170,7 @@ $winner = $_SESSION["winner"] ?? null;
                 </div>
                 <div class="row mt-2">
                     <div class="d-flex justify-content-center">
-                        <input name="fight" type="submit" value="FIGHT">
+                        <input class="btn btn-outline-primary" name="fight" type="submit" value="FIGHT">
                     </div>
                 </div>
             </form>

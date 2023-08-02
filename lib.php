@@ -17,7 +17,7 @@ function setInfoInSession(?array $player, ?array $adversaire, ?array $combat): v
 
 function removeInfoInSession(): void
 {
-    session_abort();
+    session_destroy();
     $_SESSION = [];
 }
 
