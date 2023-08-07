@@ -7,6 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit453e839463bfc71911899b2f564c28b7
 {
     public static $files = array (
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
     );
@@ -16,6 +17,10 @@ class ComposerStaticInit453e839463bfc71911899b2f564c28b7
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Component\\VarDumper\\' => 28,
+        ),
+        'E' => 
+        array (
+            'Envms\\FluentPDO\\' => 16,
         ),
     );
 
@@ -27,6 +32,10 @@ class ComposerStaticInit453e839463bfc71911899b2f564c28b7
         'Symfony\\Component\\VarDumper\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/var-dumper',
+        ),
+        'Envms\\FluentPDO\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/envms/fluentpdo/src',
         ),
     );
 

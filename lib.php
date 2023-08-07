@@ -8,11 +8,21 @@ function getInfoInSession(): array
     return [$player, $adversaire, $combats];
 }
 
-function setInfoInSession(?array $player, ?array $adversaire, ?array $combat): void
+function saveState(?array $player, ?array $adversaire, array $combat = [], ?array $winner = null, ?array $fight = null): void
 {
+
     $_SESSION["player"] = $player;
     $_SESSION["adversaire"] = $adversaire;
     $_SESSION["combats"] = $combat;
+    if ($fight) {
+        $_SESSION["fight"] = $fight;
+    }
+    updateLog($combat);
+    if ($winner) {
+        $_SESSION["winner"] = $winner["name"];
+        updateWinner($winner);
+    }
+
 }
 
 function removeInfoInSession(): void
@@ -26,36 +36,40 @@ function checkErrorsForm(): array
     $formErrors = [];
     $player = $_POST['player'];
     $adversaire = $_POST['adversaire'];
+    $player["id"] = $player["id"] ?? "";
     $player["name"] = trim($player["name"]);
     $player["sante"] = intval($player["sante"]);
     $player["mana"] = intval($player["mana"]);
     $player["attaque"] = intval($player["attaque"]);
-    $player["initial_life"] = $player["sante"];
+    $adversaire["id"] = $adversaire["id"] ?? "";
     $adversaire["name"] = trim($adversaire["name"]);
     $adversaire["sante"] = intval($adversaire["sante"]);
     $adversaire["mana"] = intval($adversaire["mana"]);
     $adversaire["attaque"] = intval($adversaire["attaque"]);
-    $adversaire["initial_life"] = $adversaire["sante"];
 
     $format = '%s %s doit être superieur à %d.';
-    if ($player["attaque"] <= 0) {
-        $formErrors['player']['attaque'] = sprintf($format, "L'attaque", "du joueur", 0);
-    }
-    if ($player["mana"] <= 0) {
-        $formErrors['player']["mana"] = sprintf($format, "Le mana", "du joueur", 0);
-    }
-    if ($player["sante"] <= 0) {
-        $formErrors['player']["sante"] = sprintf($format, "La santé", "du joueur", 0);
+    if (($player["id"] ?? "") === "") {
+        if ($player["attaque"] <= 0) {
+            $formErrors['player']['attaque'] = sprintf($format, "L'attaque", "du joueur", 0);
+        }
+        if ($player["mana"] <= 0) {
+            $formErrors['player']["mana"] = sprintf($format, "Le mana", "du joueur", 0);
+        }
+        if ($player["sante"] <= 0) {
+            $formErrors['player']["sante"] = sprintf($format, "La santé", "du joueur", 0);
+        }
     }
 
-    if ($adversaire["attaque"] <= 0) {
-        $formErrors['adversaire']["attaque"] = sprintf($format, "L'attaque", "de l'adversaire", 0);
-    }
-    if ($adversaire["mana"] <= 0) {
-        $formErrors['adversaire']["mana"] = sprintf($format, "Le mana", "de l'adversaire", 0);
-    }
-    if ($adversaire["sante"] <= 0) {
-        $formErrors['adversaire']["sante"] = sprintf($format, "La santé", "de l'adversaire", 0);
+    if (($adversaire["id"] ?? "") === "") {
+        if ($adversaire["attaque"] <= 0) {
+            $formErrors['adversaire']["attaque"] = sprintf($format, "L'attaque", "de l'adversaire", 0);
+        }
+        if ($adversaire["mana"] <= 0) {
+            $formErrors['adversaire']["mana"] = sprintf($format, "Le mana", "de l'adversaire", 0);
+        }
+        if ($adversaire["sante"] <= 0) {
+            $formErrors['adversaire']["sante"] = sprintf($format, "La santé", "de l'adversaire", 0);
+        }
     }
 
     return [$formErrors, $player, $adversaire];
@@ -69,13 +83,12 @@ function attaque()
     // Jutilise max pour ne pas descendre la vie en dessous de zero
     $adversaire['sante'] = max(0, $adversaire['sante'] - $player["attaque"]);
     $combats[] = $player["name"] . " attaque " . $adversaire["name"] . " et lui inflige " . $player["attaque"] . " de degats.";
+    saveState($player, $adversaire, $combats);
 
-    setInfoInSession($player, $adversaire, $combats);
     // Si l'adversaire n'est pas mort le faire riposter
     if ($adversaire["sante"] <= 0) {
         $combats[] = $player["name"] . " a tué " . $adversaire["name"] . " c'est la fin de la partie";
-        setInfoInSession($player, $adversaire, $combats);
-        $_SESSION["winner"] = $player["name"];
+        saveState($player, $adversaire, $combats, $player);
     } else {
         adversaireAction();
     }
@@ -99,12 +112,11 @@ function adversaireAction()
 
         if ($player["sante"] <= 0) {
             $combats[] = $adversaire["name"] . " a tué " . $player["name"] . " c'est la fin de la partie";
-            setInfoInSession($player, $adversaire, $combats);
-            $_SESSION["winner"] = $adversaire["name"];
+            $winner = $adversaire;
         }
     }
 
-    setInfoInSession($player, $adversaire, $combats);
+    saveState($player, $adversaire, $combats, $winner ?? null);
 }
 
 function soin()
@@ -117,6 +129,6 @@ function soin()
     $player["mana"] -= 25;
     $combats[] = $player["name"] . " se soigne et restaure " . $soin . " points de vie.";
 
-    setInfoInSession($player, $adversaire, $combats);
+    saveState($player, $adversaire, $combats);
     adversaireAction();
 }

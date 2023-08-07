@@ -1,27 +1,44 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+require "lib.php";
+require "repository.php";
 
+$fights = getAllFights();
+$fighters = getAllFighters();
+$fightersById = [];
+foreach ($fighters as $fighter) {
+    $fightersById[$fighter["id"]] = $fighter;
+}
+$winners = [];
+$defaites = [];
+
+foreach ($fights as $fight) {
+    $id_player = "";
+    $name = $fightersById[$fight["winner"]]['name'] ?? 'Aucun';
+    $winners[$name] = ($winners[$name] ?? 0) + 1;
+}
+arsort($winners);
+
+$victoires = json_encode(array_values($winners));
+$names = json_encode(array_keys($winners));
 ?>
-
-<!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistique</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Battle</title>
     <link rel="stylesheet" href="public/bootstrap.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
 <div class="container">
+    <?php require "navbar.php" ?>
     <h1 class="card-title text-center">Les Statistiques de combats</h1>
     <hr>
     <div class="row">
-        <div class="col-6">Le nombres total de combats :</div>
-        <div class="col-6">Le combatant avec le plus de victoire :</div>
+        <div class="col-6">Le nombres total de combats : <?= count($fights) ?></div>
+        <div class="col-6">Le combatant avec le plus de victoire
+            : <?php echo array_key_first($winners); ?> avec <?php echo array_shift($winners); ?></div>
         <div class="col-6">Le combatant avec le plus de défaite :</div>
-        <div class="col-6">Le nombre de match nul :</div>
     </div>
     <hr>
     <canvas id="myChart"></canvas>
@@ -33,10 +50,10 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Superman', 'Batman', 'Cartman', 'SuperConnard', 'Maloku', 'Patator'],
+            labels: <?= $names ?>,
             datasets: [{
                 label: 'Statistiques des combats',
-                data: [12, 19, 3, 5, 2, 3],
+                data: <?= $victoires ?>,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(255, 159, 64, 0.2)',
@@ -53,6 +70,11 @@
             scales: {
                 y: {
                     beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false,
                 }
             }
         }
