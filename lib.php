@@ -22,7 +22,6 @@ function saveState(?array $player, ?array $adversaire, array $combat = [], ?arra
         $_SESSION["winner"] = $winner["name"];
         updateWinner($winner);
     }
-
 }
 
 function removeInfoInSession(): void

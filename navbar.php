@@ -13,6 +13,9 @@
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="statistiques.php">Statistiques</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="contact.php">Contact</a>
+                </li>
             </ul>
         </div>
     </div>

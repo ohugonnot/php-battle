@@ -52,11 +52,23 @@ function getFighter(string $id): array|bool
     return $db->from("fighters")->where("id", $id)->fetch();
 }
 
+function getFighterByName(string $name): array|bool
+{
+    $db = connectBDD(true);
+    return $db->from("fighters")->where("name", $name)->fetch();
+}
+
 function addFighter(array $fighter): array
 {
     $db = connectBDD(true);
     $fighter_id = $db->insertInto('fighters')->values($fighter)->execute();
-    return $db->from("fighters")->where("id", $fighter_id)->fetch();
+    return getFighter($fighter_id);
+}
+
+function getFight(string $id)
+{
+    $db = connectBDD(true);
+    return $db->from("fights")->where("id", $id)->fetch();
 }
 
 function addFight(array $player, array $adversaire): array
@@ -64,7 +76,7 @@ function addFight(array $player, array $adversaire): array
     $db = connectBDD(true);
     $fight = ["fighter1" => $player["id"], "fighter2" => $adversaire["id"]];
     $fight_id = $db->insertInto('fights')->values($fight)->execute();
-    return $db->from("fights")->where("id", $fight_id)->fetch();
+    return getFight($fight_id);
 }
 
 function updateLog(array $log): void

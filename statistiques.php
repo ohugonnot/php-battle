@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-require "lib.php";
 require "repository.php";
 
 $fights = getAllFights();
@@ -13,11 +12,17 @@ $winners = [];
 $defaites = [];
 
 foreach ($fights as $fight) {
-    $id_player = "";
-    $name = $fightersById[$fight["winner"]]['name'] ?? 'Aucun';
+    $id_player = $fight["fighter1"];
+    $id_adversaire = $fight["fighter2"];
+    $id_winner = $fight["winner"];
+    $id_looser = ($id_winner == $id_player) ? $id_adversaire : $id_player;
+    $name = $fightersById[$id_winner]['name'] ?? 'Aucun';
+    $name_perdant = $fightersById[$id_looser]['name'] ?? 'Aucun';
     $winners[$name] = ($winners[$name] ?? 0) + 1;
+    $defaites[$name_perdant] = ($defaites[$name_perdant] ?? 0) + 1;
 }
 arsort($winners);
+arsort($defaites);
 
 $victoires = json_encode(array_values($winners));
 $names = json_encode(array_keys($winners));
@@ -25,7 +30,6 @@ $names = json_encode(array_keys($winners));
 <html lang="fr">
 <head>
     <title>Battle</title>
-    <link rel="stylesheet" href="public/bootstrap.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -38,7 +42,7 @@ $names = json_encode(array_keys($winners));
         <div class="col-6">Le nombres total de combats : <?= count($fights) ?></div>
         <div class="col-6">Le combatant avec le plus de victoire
             : <?php echo array_key_first($winners); ?> avec <?php echo array_shift($winners); ?></div>
-        <div class="col-6">Le combatant avec le plus de défaite :</div>
+        <div class="col-6">Le combatant avec le plus de défaite : <?php echo array_key_first($defaites); ?></div>
     </div>
     <hr>
     <canvas id="myChart"></canvas>

@@ -4,6 +4,7 @@
   },
   "require": {
     "ext-pdo": "*",
-    "envms/fluentpdo": "^2.2.0"
+    "envms/fluentpdo": "^2.2.0",
+    "vlucas/phpdotenv": "^5.5"
   }
 }
