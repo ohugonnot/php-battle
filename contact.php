@@ -1,23 +1,23 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
+require "./class/Contact.php";
+
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-dump($GLOBALS);
 $errorCaptcha = false;
 $success = false;
 
 if (isset($_POST["recaptcha-response"])) {
-    $url = "https://www.google.com/recaptcha/api/siteverify?secret={$_ENV['SECRET_KEY_GOOGLE_CAPTCHA']}&response={$_POST['recaptcha-response']}";
-    $response = file_get_contents($url);
-    if (empty($response) || is_null($response)) {
-        $errorCaptcha = true;
-    } else {
-        $data = json_decode($response);
-        if ($data->success) {
+    $contact = new Contact($_POST);
+    if ($contact->isValid()) {
+        if ($contact->captchaIsValid()) {
+            $contact->save();
             $success = true;
         } else {
             $errorCaptcha = true;
         }
+    } else {
+        // gerer les errors qui sont des $contact->errors
     }
 }
 ?>
@@ -71,13 +71,13 @@ if (isset($_POST["recaptcha-response"])) {
                                         <!-- Name Input -->
                                         <div class="form-floating mb-3">
                                             <input class="form-control" name="name" type="text" placeholder="Name"
-                                                   required/>
+                                            />
                                             <label for="name">Name</label>
                                         </div>
 
                                         <!-- Email Input -->
                                         <div class="form-floating mb-3">
-                                            <input class="form-control" name="emailAddress" type="email"
+                                            <input class="form-control" name="email" type="email"
                                                    placeholder="Email Address" required>
                                             <label for="emailAddress">Email Address</label>
                                         </div>
