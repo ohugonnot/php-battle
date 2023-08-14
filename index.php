@@ -6,11 +6,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 <html lang="fr">
 <head>
     <title>Battle</title>
-    <link rel="stylesheet" href="public/bootstrap.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
-            integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
-            crossorigin="anonymous"></script>
     <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
@@ -20,6 +16,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 <body>
 <div class="container">
+    <?php require_once "navbar.php" ?>
     <audio id="fight-song" src="fight.mp3"></audio>
     <audio id="hadoudken-song" src="Haduken.mp3"></audio>
     <audio id="fatality-song" src="fatality.mp3"></audio>
