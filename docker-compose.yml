@@ -1,11 +1,10 @@
 services:
   php:
-    image: php:8.2-cli
-    working_dir: /app
+    build: .
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - "8001:8001"
     environment:
       DB_HOST: mysql
       DB_USER: root
@@ -14,9 +13,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: >
-      sh -c "docker-php-ext-install pdo pdo_mysql &&
-             php -S 0.0.0.0:8000"
 
   mysql:
     image: mysql:8.0

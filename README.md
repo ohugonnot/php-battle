@@ -121,10 +121,10 @@ statistiques.php    ← stats des combats
 
 ```bash
 composer install
-docker compose up
+docker compose up --build
 ```
 
-Puis ouvrir http://localhost:8000. MySQL démarre automatiquement avec le schéma.
+Puis ouvrir http://localhost:8001. MySQL démarre automatiquement avec le schéma.
 
 ### Sans Docker (PHP + MySQL déjà installés)
 
@@ -133,5 +133,5 @@ composer install
 # Importer le schéma dans MySQL
 mysql -u root < schema.sql
 # Lancer le serveur PHP
-php -S localhost:8000
+php -S localhost:8001
 ```
