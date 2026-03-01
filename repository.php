@@ -61,6 +61,7 @@ function getFighterByName(string $name): array|bool
 function addFighter(array $fighter): array
 {
     $db = connectBDD(true);
+    unset($fighter['id']);
     $fighter_id = $db->insertInto('fighters')->values($fighter)->execute();
     return getFighter($fighter_id);
 }
