@@ -11,10 +11,10 @@ function connectBDD(bool $is_fluent = false): PDO|Envms\FluentPDO\Query
     if ($is_fluent && !empty($fluent))
         return $fluent;
 
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "battle";
+    $servername = getenv('DB_HOST') ?: "localhost";
+    $username   = getenv('DB_USER') ?: "root";
+    $password   = getenv('DB_PASS') ?: "";
+    $dbname     = getenv('DB_NAME') ?: "battle";
 
     try {
         $db = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);

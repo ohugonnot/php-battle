@@ -117,7 +117,21 @@ statistiques.php    ← stats des combats
 
 ## Lancer le projet
 
+### Avec Docker (recommandé — aucune installation requise)
+
 ```bash
 composer install
+docker compose up
+```
+
+Puis ouvrir http://localhost:8000. MySQL démarre automatiquement avec le schéma.
+
+### Sans Docker (PHP + MySQL déjà installés)
+
+```bash
+composer install
+# Importer le schéma dans MySQL
+mysql -u root < schema.sql
+# Lancer le serveur PHP
 php -S localhost:8000
 ```
