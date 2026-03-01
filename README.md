@@ -1,6 +1,6 @@
 # PHP Battle
 
-Jeu de combat de personnages en PHP orienté objet. Chaque personnage a ses propres stats (force, défense, vitesse) et attaques spéciales. Les combats se résolvent tour par tour avec calcul de dégâts et effets de statut.
+Exercice pédagogique conçu et donné à mes étudiants lors de mon activité de formateur développeur web. Objectif : découvrir la POO PHP de façon ludique via un jeu de combat de personnages. Chaque personnage a ses propres stats (force, défense, vitesse) et attaques spéciales. Les combats se résolvent tour par tour avec calcul de dégâts et effets de statut.
 
 ## Fonctionnalités
 
