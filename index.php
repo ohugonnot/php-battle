@@ -19,8 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["fight"])) {
         } else {
             $adversaire = addFighter($adversaire);
         }
-        $player["initial_life"] = $player["sante"];
+        $player["initial_life"]     = $player["sante"];
         $adversaire["initial_life"] = $adversaire["sante"];
+        $player["manaMax"]          = $player["mana"];
+        $adversaire["manaMax"]      = $adversaire["mana"];
         $fight = addFight($player, $adversaire);
         saveState($player, $adversaire, [], null, $fight);
     }
@@ -32,6 +34,10 @@ if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["attaque"])) {
 
 if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["soin"])) {
     soin();
+}
+
+if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["special"])) {
+    coupSpecial();
 }
 
 if ($_SERVER["REQUEST_METHOD"] === 'POST' && isset($_POST["restart"])) {
@@ -317,9 +323,10 @@ $fighters = getAllFighters();
             </div>
             <div class="bars">
                 <?php
-                $pHpPct   = $player["initial_life"] > 0 ? max(0, round($player["sante"] / $player["initial_life"] * 100)) : 0;
-                $pManaPct = min(100, max(0, $player["mana"]));
-                $pLowHp   = $pHpPct <= 25 ? ' low' : '';
+                $pHpPct      = $player["initial_life"] > 0 ? max(0, round($player["sante"] / $player["initial_life"] * 100)) : 0;
+                $playerManaMax = $player["manaMax"] ?? $player["mana"];
+                $pManaPct    = $playerManaMax > 0 ? max(0, round($player["mana"] / $playerManaMax * 100)) : 0;
+                $pLowHp      = $pHpPct <= 25 ? ' low' : '';
                 ?>
                 <div class="bar-wrap">
                     <div class="bar-label">
@@ -333,7 +340,7 @@ $fighters = getAllFighters();
                 <div class="bar-wrap">
                     <div class="bar-label">
                         <span>Mana</span>
-                        <span class="bar-val"><?= $player["mana"] ?></span>
+                        <span class="bar-val"><?= $player["mana"] ?> / <?= $playerManaMax ?></span>
                     </div>
                     <div class="bar-bg">
                         <div class="bar-fill mana-fill" style="width:<?= $pManaPct ?>%"></div>
@@ -369,9 +376,10 @@ $fighters = getAllFighters();
             </div>
             <div class="bars">
                 <?php
-                $eHpPct   = $adversaire["initial_life"] > 0 ? max(0, round($adversaire["sante"] / $adversaire["initial_life"] * 100)) : 0;
-                $eManaPct = min(100, max(0, $adversaire["mana"]));
-                $eLowHp   = $eHpPct <= 25 ? ' low' : '';
+                $eHpPct        = $adversaire["initial_life"] > 0 ? max(0, round($adversaire["sante"] / $adversaire["initial_life"] * 100)) : 0;
+                $advManaMax    = $adversaire["manaMax"] ?? $adversaire["mana"];
+                $eManaPct      = $advManaMax > 0 ? max(0, round($adversaire["mana"] / $advManaMax * 100)) : 0;
+                $eLowHp        = $eHpPct <= 25 ? ' low' : '';
                 ?>
                 <div class="bar-wrap">
                     <div class="bar-label">
@@ -385,7 +393,7 @@ $fighters = getAllFighters();
                 <div class="bar-wrap">
                     <div class="bar-label">
                         <span>Mana</span>
-                        <span class="bar-val"><?= $adversaire["mana"] ?></span>
+                        <span class="bar-val"><?= $adversaire["mana"] ?> / <?= $advManaMax ?></span>
                     </div>
                     <div class="bar-bg">
                         <div class="bar-fill mana-fill" style="width:<?= $eManaPct ?>%"></div>
@@ -404,6 +412,9 @@ $fighters = getAllFighters();
             <input class="btn-action btn-heal" name="soin" type="submit"
                    value="✨ Se soigner (25 mana)"
                    <?= $player["mana"] < 25 ? 'disabled' : '' ?>>
+            <?php if ($player["mana"] >= 50): ?>
+            <input class="btn-action btn-special" name="special" type="submit" value="⚡ Coup Spécial">
+            <?php endif; ?>
             <input class="btn-action btn-stop" name="restart" type="submit" value="✦ Stopper le combat">
         </div>
     </form>
@@ -412,7 +423,23 @@ $fighters = getAllFighters();
         <div class="log-header">📜 Chroniques du Combat</div>
         <div class="log-scroll">
             <?php foreach (array_reverse($combats ?? []) as $combat): ?>
-                <div class="log-line attack"><?= htmlspecialchars($combat) ?></div>
+                <?php
+                $logClass = 'info';
+                if (str_contains($combat, 'COUP CRITIQUE')) {
+                    $logClass = 'attack critical';
+                } elseif (str_contains($combat, 'COUP SPÉCIAL')) {
+                    $logClass = 'special';
+                } elseif (str_contains($combat, 'fin de la partie')) {
+                    $logClass = 'victory';
+                } elseif (str_contains($combat, 'se soigne')) {
+                    $logClass = 'heal';
+                } elseif (str_contains($combat, $player['name'])) {
+                    $logClass = 'attack';
+                } else {
+                    $logClass = 'enemy-attack';
+                }
+                ?>
+                <div class="log-line <?= $logClass ?>"><?= htmlspecialchars($combat) ?></div>
             <?php endforeach; ?>
         </div>
     </div>

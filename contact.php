@@ -21,13 +21,18 @@ if (isset($_POST["recaptcha-response"])) {
     }
 }
 ?>
-
-<html>
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdP24wnAAAAAAmZwDAxHLZy3J6gMoK7bV8mFzYP"></script>
-</head>
-
-<script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Battle of Shadows</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/battle.css">
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdP24wnAAAAAAmZwDAxHLZy3J6gMoK7bV8mFzYP"></script>
+  <script>
     window.addEventListener('load', () => {
         document.getElementById("contactForm").addEventListener("submit", (e) => {
             e.preventDefault();
@@ -38,84 +43,53 @@ if (isset($_POST["recaptcha-response"])) {
             });
         })
     })
-</script>
+  </script>
+</head>
 <body>
-<div class="container">
-    <?php require "navbar.php" ?>
+  <?php require "navbar.php"; ?>
 
-    <div class="container-fluid px-5 my-5">
-        <div class="row justify-content-center">
-            <div class="col-xl-10">
-                <div class="card border-0 rounded-3 shadow-lg overflow-hidden">
-                    <div class="card-body p-0">
-                        <div class="row g-0">
-                            <div class="col-sm-6 d-none d-sm-block bg-image"></div>
-                            <div class="col-sm-6 p-4">
-                                <div class="text-center">
-                                    <div class="h3 fw-light">Contact Form</div>
-                                    <p class="mb-4 text-muted">Nous laisser un message</p>
-                                </div>
-                                <form id="contactForm" method="POST" action="contact.php">
-                                    <?php if ($errorCaptcha) { ?>
-                                        <div class="alert alert-danger">
-                                            Erreur de Capatcha veuillez réessayer !
-                                        </div>
-                                    <?php } ?>
-                                    <?php if ($success) { ?>
-                                        <div class="alert alert-success">
-                                            Le message à bien été sauvegardé.
-                                            <br>
-                                            Merci de votre participation.
-                                        </div>
-                                    <?php } else { ?>
-                                        <!-- Name Input -->
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" name="name" type="text" placeholder="Name"
-                                            />
-                                            <label for="name">Name</label>
-                                        </div>
+  <div class="contact-page">
+    <div class="contact-card">
+      <h1 class="contact-title">✉ Envoyer un Message</h1>
+      <p class="contact-subtitle">Parlez, aventurier...</p>
 
-                                        <!-- Email Input -->
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" name="email" type="email"
-                                                   placeholder="Email Address" required>
-                                            <label for="emailAddress">Email Address</label>
-                                        </div>
+      <form id="contactForm" method="POST" action="contact.php">
+        <?php if ($errorCaptcha) { ?>
+          <div class="contact-error">
+            ⚠ Erreur de Captcha — veuillez réessayer, voyageur.
+          </div>
+        <?php } ?>
 
-                                        <!-- Message Input -->
-                                        <div class="form-floating mb-3">
-                                        <textarea class="form-control" name="message" type="text" placeholder="Message"
-                                                  style="height: 10rem;" required></textarea>
-                                            <label for="message">Message</label>
-                                        </div>
-                                        <input type="hidden" id="recaptchaResponse" name="recaptcha-response">
-                                        <!-- Submit button -->
-                                        <div class="d-grid">
-                                            <button class="btn btn-primary btn-lg" id="submitButton">
-                                                Submit
-                                            </button>
-                                        </div>
-                                    <?php } ?>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <?php if ($success) { ?>
+          <div class="contact-success">
+            <div style="font-size: 2rem; margin-bottom: 10px;">✦</div>
+            <p>Votre message a été transmis aux ombres.</p>
+            <p style="font-family:'Crimson Text',serif; font-style:italic; margin-top:8px;">Merci de votre participation.</p>
+          </div>
+        <?php } else { ?>
+          <div class="form-group">
+            <label for="name">Nom</label>
+            <input type="text" id="name" name="name" placeholder="Votre nom, aventurier" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Adresse e-mail</label>
+            <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Vos mots résonnent dans les ténèbres..." required></textarea>
+          </div>
+
+          <input type="hidden" id="recaptchaResponse" name="recaptcha-response">
+
+          <button class="btn-fight" id="submitButton" type="submit" style="width:100%; margin-top:8px;">
+            Envoyer le Message
+          </button>
+        <?php } ?>
+      </form>
     </div>
-    <style>
-        body {
-        }
-
-        .bg-image {
-            background-image: url('https://source.unsplash.com/kKvQJ6rK6S4/660x1000');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-    </style>
-</div>
-
+  </div>
 </body>
 </html>

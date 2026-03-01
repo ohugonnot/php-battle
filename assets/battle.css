@@ -658,6 +658,24 @@ body::after {
   border-color: var(--border-gold);
 }
 
+.btn-special {
+  background: linear-gradient(135deg, #2a1a5a, #5a3aaf);
+  color: #e0d0ff;
+  box-shadow: 0 0 12px rgba(90,58,175,0.4);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  padding: 14px 28px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: transform 0.15s, box-shadow 0.3s;
+}
+
+.btn-special:hover { box-shadow: 0 0 25px rgba(120,80,220,0.7); transform: scale(1.04); }
+
 .btn-action::before {
   content: '';
   position: absolute;
@@ -732,11 +750,13 @@ body::after {
   line-height: 1.4;
 }
 
-.log-line.attack { color: #e87060; }
-.log-line.heal   { color: #60c080; }
-.log-line.info   { color: var(--text-dim); font-style: italic; }
-.log-line.victory { color: var(--gold-light); font-weight: 600; }
-.log-line.enemy-attack { color: #c06050; }
+.log-line.attack        { color: #e87060; }
+.log-line.heal          { color: #60c080; }
+.log-line.info          { color: var(--text-dim); font-style: italic; }
+.log-line.victory       { color: var(--gold-light); font-weight: 600; }
+.log-line.enemy-attack  { color: #c06050; }
+.log-line.special       { color: #b080ff; font-weight: 600; }
+.log-line.critical      { color: #ffa040; }
 
 .log-line .turn-num {
   color: var(--text-dim);
@@ -975,4 +995,88 @@ body::after {
   .stats-grid { flex-direction: column; align-items: center; }
   .dark-nav { padding: 0 16px; }
   .nav-links { gap: 16px; }
+  .contact-card { padding: 28px 20px; }
+}
+
+/* ============================================================
+   CONTACT PAGE
+   ============================================================ */
+.contact-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.contact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 40px 48px;
+  width: 100%;
+  max-width: 520px;
+  animation: borderFlame 4s ease-in-out infinite;
+  position: relative;
+}
+
+.contact-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 0.15em;
+  margin-bottom: 6px;
+  animation: goldGlow 3s ease-in-out infinite;
+}
+
+.contact-subtitle {
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 30px;
+}
+
+.form-group textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 3px;
+  outline: none;
+  resize: vertical;
+  min-height: 140px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+.form-group textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(201,168,76,0.25);
+}
+
+.contact-success {
+  text-align: center;
+  color: var(--heal-light);
+  font-family: 'Cinzel', serif;
+  padding: 20px;
+  border: 1px solid var(--heal);
+  border-radius: 4px;
+  background: rgba(42,107,58,0.1);
+}
+
+.contact-error {
+  color: var(--blood-light);
+  font-family: 'Crimson Text', serif;
+  padding: 12px 16px;
+  border: 1px solid var(--blood);
+  border-radius: 4px;
+  background: rgba(139,26,26,0.1);
+  margin-bottom: 20px;
 }
