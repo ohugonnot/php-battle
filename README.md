@@ -1,26 +1,28 @@
-# PHP Battle — Solution
+# PHP Battle
 
-Correction de l'exercice POO PHP : jeu de combat de personnages tour par tour.
+Exercice pédagogique conçu et donné à mes étudiants lors de mon activité de formateur développeur web.
 
-> La branche `exercice` contient le point de départ si tu veux faire l'exercice toi-même.
+**Objectif** : découvrir la POO PHP de façon ludique via un jeu de combat de personnages tour par tour.
 
-## Installation
+## Comment utiliser ce repo
 
-```bash
-composer install
-php -S localhost:8000
-```
+| Branche | Contenu |
+|---------|---------|
+| [`exercice`](../../tree/exercice) | Point de départ : interface fournie, classes à créer |
+| [`solution`](../../tree/solution) | Correction complète avec persistance BDD et statistiques |
 
-## Ce qui a été implémenté
+> Commence par la branche `exercice`, consulte `solution` uniquement si tu es bloqué.
 
-- Classe `Personnage` avec gestion des PV, attaque, mana et dégâts
-- Combat tour par tour avec résolution aléatoire pondérée
-- Persistance des personnages et historique des combats via PDO/MySQL
-- Statistiques de combat par personnage (`statistiques.php`)
-- Effets sonores (Hadouken, Fatality) pour l'ambiance
+## L'exercice en bref
+
+L'interface de combat est fournie (`index.php`, `navbar.php`). Tu dois créer :
+
+- **`Personnage`** — propriétés (nom, PV, attaque, mana), méthodes (`attaquer()`, `recevoirDegats()`, `estVivant()`)
+- La logique de **combat tour par tour** jusqu'à ce qu'un personnage tombe à 0 PV
+- **Bonus** : persister les personnages et les stats en base de données
 
 ## Stack
 
-- PHP 8 — POO, PDO
-- MySQL pour la persistance
+- PHP 8 — POO
+- MySQL / PDO pour la persistance (bonus)
 - Composer pour l'autoloading
