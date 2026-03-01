@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Battle of Shadows — Dark Fantasy Combat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg:          #0a0806;
+  --bg-card:     #12100e;
+  --bg-card2:    #1a1510;
+  --gold:        #c9a84c;
+  --gold-light:  #f0d080;
+  --gold-dark:   #7a5c1e;
+  --blood:       #8b1a1a;
+  --blood-light: #c0392b;
+  --mana:        #2a4a8b;
+  --mana-light:  #4a7abf;
+  --heal:        #2a6b3a;
+  --heal-light:  #4aaf6a;
+  --text:        #d4c5a9;
+  --text-dim:    #8a7a64;
+  --border:      #3a2f1e;
+  --border-gold: #5a4520;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 18px;
+  overflow-x: hidden;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+.screen {
+  position: relative;
+  z-index: 1;
+  display: none;
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+.screen.active { display: flex; flex-direction: column; align-items: center; }
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes flicker {
+  0%,100% { text-shadow: 0 0 8px #ff6600, 0 0 20px #ff4400, 0 0 40px #cc2200; opacity: 1; }
+  25%      { text-shadow: 0 0 5px #ff8800, 0 0 15px #ff6600, 0 0 30px #cc4400; opacity: 0.92; }
+  50%      { text-shadow: 0 0 12px #ffaa00, 0 0 30px #ff6600, 0 0 60px #cc2200; opacity: 1; }
+  75%      { text-shadow: 0 0 4px #ff5500, 0 0 10px #ff3300, 0 0 25px #aa1100; opacity: 0.88; }
+}
+
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 10px var(--gold), 0 0 25px #8b3a00, 0 0 50px #550000; }
+  50%      { box-shadow: 0 0 20px var(--gold-light), 0 0 50px #cc5500, 0 0 90px #880000; }
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0) rotate(0deg); }
+  10%      { transform: translateX(-8px) rotate(-2deg); }
+  20%      { transform: translateX(8px)  rotate(2deg); }
+  30%      { transform: translateX(-6px) rotate(-1deg); }
+  40%      { transform: translateX(6px)  rotate(1deg); }
+  50%      { transform: translateX(-4px) rotate(-1deg); }
+  60%      { transform: translateX(4px)  rotate(0.5deg); }
+  70%      { transform: translateX(-2px) rotate(0deg); }
+  80%      { transform: translateX(2px); }
+}
+
+@keyframes slideInLog {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fallDown {
+  from { opacity: 0; transform: translateY(-60px) rotate(-5deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes goldGlow {
+  0%,100% { text-shadow: 0 0 15px var(--gold), 0 0 40px var(--gold-dark); }
+  50%      { text-shadow: 0 0 30px var(--gold-light), 0 0 80px var(--gold), 0 0 120px var(--gold-dark); }
+}
+
+@keyframes bloodGlow {
+  0%,100% { text-shadow: 0 0 15px var(--blood), 0 0 40px #550000; }
+  50%      { text-shadow: 0 0 30px var(--blood-light), 0 0 80px var(--blood), 0 0 120px #550000; }
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes particleRise {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-60px) scale(0.2); }
+}
+
+@keyframes borderFlame {
+  0%,100% { border-color: var(--gold-dark); box-shadow: 0 0 5px rgba(201,168,76,0.2); }
+  50%      { border-color: var(--gold); box-shadow: 0 0 15px rgba(201,168,76,0.5), inset 0 0 10px rgba(201,168,76,0.05); }
+}
+
+/* ============================================================
+   SCREEN 1 — SETUP
+   ============================================================ */
+#screen-setup {
+  justify-content: center;
+  gap: 0;
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.setup-header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  animation: goldGlow 3s ease-in-out infinite;
+}
+
+.setup-header .subtitle {
+  font-family: 'Crimson Text', serif;
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 1rem;
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+}
+
+.setup-arena {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 1100px;
+}
+
+/* Fighter card */
+.fighter-card {
+  flex: 1;
+  max-width: 380px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 30px 28px;
+  position: relative;
+  animation: borderFlame 4s ease-in-out infinite;
+}
+
+.fighter-card.player-card {
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+}
+
+.fighter-card.enemy-card {
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  animation-delay: 2s;
+}
+
+.fighter-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-card .card-title { color: var(--gold); }
+.enemy-card .card-title  { color: var(--blood-light); }
+
+/* Silhouette */
+.silhouette-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.enemy-card .silhouette-wrap { animation-delay: 2s; }
+
+.silhouette {
+  width: 90px;
+  height: 140px;
+  position: relative;
+}
+
+/* CSS warrior silhouette — player */
+.silhouette-warrior {
+  filter: drop-shadow(0 0 12px rgba(201,168,76,0.4));
+}
+
+.silhouette-enemy {
+  filter: drop-shadow(0 0 12px rgba(139,26,26,0.5));
+  transform: scaleX(-1);
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+
+.form-group input {
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 3px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+  border-color: var(--gold-dark);
+  box-shadow: 0 0 8px rgba(201,168,76,0.2);
+}
+
+.enemy-card .form-group input:focus {
+  border-color: var(--blood);
+  box-shadow: 0 0 8px rgba(139,26,26,0.3);
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+.form-row .form-group { flex: 1; }
+
+/* VS Center */
+.vs-center {
+  width: 120px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 2;
+}
+
+.vs-text {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  color: #ff6600;
+  animation: flicker 1.8s ease-in-out infinite;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.vs-flames {
+  font-size: 1.8rem;
+  margin: 6px 0;
+  animation: flicker 1.4s ease-in-out infinite reverse;
+}
+
+/* Fight button */
+.fight-btn-wrap {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+  position: relative;
+}
+
+.btn-fight {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #1a0f00;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  border: none;
+  padding: 18px 64px;
+  cursor: pointer;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  animation: glowPulse 2s ease-in-out infinite;
+  transition: transform 0.15s;
+}
+
+.btn-fight:hover {
+  transform: scale(1.04);
+  background: linear-gradient(135deg, var(--gold-light) 0%, #fff0a0 50%, var(--gold-light) 100%);
+}
+
+.btn-fight:active { transform: scale(0.98); }
+
+.btn-fight::before {
+  content: '🔥';
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  animation: flicker 1s ease-in-out infinite;
+}
+
+.btn-fight::after {
+  content: '🔥';
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  animation: flicker 1s ease-in-out infinite 0.5s;
+}
+
+/* ============================================================
+   SCREEN 2 — BATTLE
+   ============================================================ */
+#screen-battle {
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.battle-header {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+.battle-header span {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* Combatants row */
+.combatants {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.combatant {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.combatant::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.combatant.player-side::before {
+  background: linear-gradient(180deg, rgba(201,168,76,0.04) 0%, transparent 60%);
+}
+
+.combatant.enemy-side::before {
+  background: linear-gradient(180deg, rgba(139,26,26,0.06) 0%, transparent 60%);
+}
+
+.combatant-name {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.player-side .combatant-name { color: var(--gold); }
+.enemy-side  .combatant-name { color: var(--blood-light); }
+
+.combatant-silhouette {
+  width: 80px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+  transition: filter 0.3s;
+}
+
+.enemy-side .combatant-silhouette {
+  animation-delay: 1.5s;
+}
+
+.combatant-silhouette.hit {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* HP / Mana bars */
+.bars {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bar-wrap {
+  position: relative;
+}
+
+.bar-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bar-label .bar-val {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.bar-bg {
+  height: 14px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px 2px 0 0;
+}
+
+.hp-fill {
+  background: linear-gradient(90deg, #5a0f0f, var(--blood-light));
+}
+
+.hp-fill.low {
+  background: linear-gradient(90deg, #3a0808, #ff2020);
+  animation: glowPulse 0.8s ease-in-out infinite;
+}
+
+.mana-fill {
+  background: linear-gradient(90deg, #0f1f4a, var(--mana-light));
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.btn-action {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  padding: 14px 28px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: transform 0.15s, box-shadow 0.3s, opacity 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-action:active:not(:disabled) { transform: scale(0.97); }
+
+.btn-action:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-attack {
+  background: linear-gradient(135deg, #5a0808, var(--blood));
+  color: #f5d0c0;
+  box-shadow: 0 0 12px rgba(139,26,26,0.4);
+}
+
+.btn-attack:hover:not(:disabled) {
+  box-shadow: 0 0 25px rgba(192,57,43,0.7);
+  transform: scale(1.04);
+}
+
+.btn-heal {
+  background: linear-gradient(135deg, #1a2a4a, var(--mana));
+  color: #c0d0f0;
+  box-shadow: 0 0 12px rgba(42,74,139,0.4);
+}
+
+.btn-heal:hover:not(:disabled) {
+  box-shadow: 0 0 25px rgba(74,122,191,0.6);
+  transform: scale(1.04);
+}
+
+.btn-action::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  transition: left 0.4s;
+}
+
+.btn-action:hover::before { left: 150%; }
+
+/* Log / Chroniques */
+.log-section {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.log-header {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(201,168,76,0.04);
+}
+
+.log-scroll {
+  height: 180px;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scroll-behavior: smooth;
+}
+
+.log-scroll::-webkit-scrollbar { width: 4px; }
+.log-scroll::-webkit-scrollbar-track { background: transparent; }
+.log-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Log parchment texture */
+.log-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 27px,
+      rgba(201,168,76,0.03) 27px,
+      rgba(201,168,76,0.03) 28px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.log-scroll { position: relative; z-index: 1; }
+
+.log-line {
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95rem;
+  animation: slideInLog 0.35s ease-out both;
+  padding: 2px 0;
+  line-height: 1.4;
+}
+
+.log-line.attack { color: #e87060; }
+.log-line.heal   { color: #60c080; }
+.log-line.info   { color: var(--text-dim); font-style: italic; }
+.log-line.victory { color: var(--gold-light); font-weight: 600; }
+.log-line.enemy-attack { color: #c06050; }
+
+.log-line .turn-num {
+  color: var(--text-dim);
+  font-size: 0.8em;
+  margin-right: 6px;
+}
+
+/* ============================================================
+   SCREEN 3 — VICTORY / DEFEAT
+   ============================================================ */
+#screen-victory {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 28px;
+}
+
+.result-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.result-title.victory-text {
+  color: var(--gold-light);
+  animation: fadeInScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, goldGlow 2.5s ease-in-out infinite 0.8s;
+}
+
+.result-title.defeat-text {
+  color: #703030;
+  animation: fallDown 0.9s cubic-bezier(0.6, -0.3, 0.7, 1.3) both, bloodGlow 2.5s ease-in-out infinite 0.9s;
+}
+
+.result-winner {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeInScale 0.6s ease-out 0.4s both;
+}
+
+.result-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeInScale 0.5s ease-out 0.7s both;
+}
+
+.stat-item {
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px 28px;
+  border-radius: 4px;
+}
+
+.stat-value {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.btn-replay {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #1a0f00;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  border: none;
+  padding: 16px 50px;
+  cursor: pointer;
+  border-radius: 3px;
+  animation: glowPulse 2s ease-in-out infinite, fadeInScale 0.5s ease-out 1s both;
+  transition: transform 0.15s;
+  opacity: 0;
+}
+
+.btn-replay:hover { transform: scale(1.05); }
+.btn-replay:active { transform: scale(0.97); }
+
+/* Decorative rune divider */
+.rune-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.rune-divider::before,
+.rune-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+.rune-divider span {
+  color: var(--gold-dark);
+  font-size: 1rem;
+  letter-spacing: 0.4em;
+}
+
+/* Enemy turn indicator */
+.turn-indicator {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px;
+  border-radius: 3px;
+  transition: all 0.3s;
+  min-height: 28px;
+}
+
+.turn-indicator.enemy-turn {
+  color: var(--blood-light);
+  background: rgba(139,26,26,0.1);
+  border: 1px solid rgba(139,26,26,0.2);
+  animation: glowPulse 0.6s ease-in-out infinite;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 680px) {
+  .setup-arena { flex-direction: column; align-items: center; }
+  .fighter-card { max-width: 100%; width: 100%; border-radius: 4px !important; border: 1px solid var(--border) !important; }
+  .vs-center { width: 100%; height: 60px; flex-direction: row; gap: 16px; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .combatants { flex-direction: column; }
+  .result-stats { flex-direction: column; gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SCREEN 1 — SETUP
+     ============================================================ -->
+<section id="screen-setup" class="screen active">
+
+  <div class="setup-header">
+    <h1>⚔ Battle of Shadows ⚔</h1>
+    <p class="subtitle">Que le sang coule et les légendes naissent</p>
+  </div>
+
+  <div class="setup-arena">
+
+    <!-- Player -->
+    <div class="fighter-card player-card">
+      <div class="card-title">⚔ Champion</div>
+
+      <div class="silhouette-wrap">
+        <svg class="silhouette silhouette-warrior" width="90" height="140" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <ellipse cx="45" cy="18" rx="12" ry="14" fill="#c9a84c" opacity="0.85"/>
+          <!-- Helmet crest -->
+          <polygon points="35,10 45,2 55,10 50,12 45,6 40,12" fill="#f0d080" opacity="0.9"/>
+          <!-- Body / Armor -->
+          <rect x="30" y="32" width="30" height="36" rx="3" fill="#8a7040" opacity="0.9"/>
+          <!-- Chest plate -->
+          <ellipse cx="45" cy="44" rx="12" ry="10" fill="#c9a84c" opacity="0.6"/>
+          <!-- Belt -->
+          <rect x="28" y="64" width="34" height="6" rx="2" fill="#5a3a10" opacity="0.95"/>
+          <!-- Left arm -->
+          <rect x="16" y="33" width="13" height="32" rx="5" fill="#8a7040" opacity="0.85"/>
+          <!-- Right arm (sword arm) -->
+          <rect x="61" y="33" width="13" height="32" rx="5" fill="#8a7040" opacity="0.85"/>
+          <!-- Sword -->
+          <rect x="74" y="18" width="5" height="55" rx="2" fill="#d0d8e0" opacity="0.9"/>
+          <polygon points="74,18 79,18 76.5,8" fill="#e0e8f0" opacity="0.95"/>
+          <rect x="70" y="42" width="13" height="4" rx="2" fill="#c9a84c" opacity="0.9"/>
+          <!-- Shield (left) -->
+          <ellipse cx="10" cy="52" rx="9" ry="12" fill="#5a3a10" opacity="0.9"/>
+          <ellipse cx="10" cy="52" rx="6" ry="9" fill="#8b1a1a" opacity="0.7"/>
+          <line x1="10" y1="43" x2="10" y2="61" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+          <line x1="4" y1="52" x2="16" y2="52" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+          <!-- Legs -->
+          <rect x="30" y="70" width="13" height="44" rx="5" fill="#5a4820" opacity="0.9"/>
+          <rect x="47" y="70" width="13" height="44" rx="5" fill="#5a4820" opacity="0.9"/>
+          <!-- Boots -->
+          <rect x="28" y="106" width="17" height="12" rx="3" fill="#2a1e0e" opacity="0.95"/>
+          <rect x="45" y="106" width="17" height="12" rx="3" fill="#2a1e0e" opacity="0.95"/>
+          <!-- Knee guards -->
+          <ellipse cx="36" cy="90" rx="7" ry="5" fill="#c9a84c" opacity="0.5"/>
+          <ellipse cx="53" cy="90" rx="7" ry="5" fill="#c9a84c" opacity="0.5"/>
+        </svg>
+      </div>
+
+      <div class="form-group">
+        <label>Nom du héros</label>
+        <input type="text" id="player-name" value="Valdris l'Implacable" placeholder="Nom du héros">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Points de vie</label>
+          <input type="number" id="player-hp" value="100" min="10" max="999">
+        </div>
+        <div class="form-group">
+          <label>Attaque</label>
+          <input type="number" id="player-atk" value="30" min="1" max="999">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mana</label>
+        <input type="number" id="player-mana" value="100" min="0" max="999">
+      </div>
+    </div>
+
+    <!-- VS -->
+    <div class="vs-center">
+      <div class="vs-flames">🔥</div>
+      <div class="vs-text">VS</div>
+      <div class="vs-flames">🔥</div>
+    </div>
+
+    <!-- Enemy -->
+    <div class="fighter-card enemy-card">
+      <div class="card-title">☠ Ennemi</div>
+
+      <div class="silhouette-wrap">
+        <svg class="silhouette silhouette-enemy" width="90" height="140" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head / skull-like -->
+          <ellipse cx="45" cy="18" rx="13" ry="15" fill="#5a1010" opacity="0.9"/>
+          <ellipse cx="45" cy="18" rx="10" ry="12" fill="#8b2020" opacity="0.6"/>
+          <!-- Horns -->
+          <path d="M34 10 Q28 2 32 -2 Q36 4 38 10" fill="#3a0a0a" opacity="0.9"/>
+          <path d="M56 10 Q62 2 58 -2 Q54 4 52 10" fill="#3a0a0a" opacity="0.9"/>
+          <!-- Eyes glow -->
+          <ellipse cx="40" cy="17" rx="4" ry="3" fill="#ff2020" opacity="0.7"/>
+          <ellipse cx="50" cy="17" rx="4" ry="3" fill="#ff2020" opacity="0.7"/>
+          <!-- Body / dark cloak -->
+          <path d="M22 35 Q30 30 45 32 Q60 30 68 35 L72 110 Q60 115 45 114 Q30 115 18 110 Z" fill="#1a0808" opacity="0.95"/>
+          <!-- Cloak detail -->
+          <path d="M28 35 Q36 40 45 38 Q54 40 62 35" stroke="#5a1010" stroke-width="1.5" fill="none" opacity="0.8"/>
+          <!-- Shoulder spikes -->
+          <polygon points="22,35 16,25 20,38" fill="#3a0a0a" opacity="0.9"/>
+          <polygon points="68,35 74,25 70,38" fill="#3a0a0a" opacity="0.9"/>
+          <!-- Dark sword / scythe -->
+          <rect x="66" y="15" width="5" height="60" rx="2" fill="#2a0a0a" opacity="0.95"/>
+          <path d="M66 15 Q80 20 78 35 Q70 30 66 35" fill="#1a0505" opacity="0.9"/>
+          <rect x="62" y="40" width="14" height="4" rx="2" fill="#5a1010" opacity="0.9"/>
+          <!-- Legs / cloak bottom -->
+          <path d="M28 100 L24 130 Q30 132 36 130 L38 100" fill="#120606" opacity="0.95"/>
+          <path d="M52 100 L54 130 Q60 132 66 130 L62 100" fill="#120606" opacity="0.95"/>
+          <!-- Arm left -->
+          <rect x="12" y="38" width="13" height="30" rx="5" fill="#1a0808" opacity="0.9"/>
+          <!-- Arm right -->
+          <rect x="65" y="38" width="13" height="30" rx="5" fill="#1a0808" opacity="0.9"/>
+          <!-- Rune glow on chest -->
+          <text x="45" y="75" font-size="18" text-anchor="middle" fill="#ff4040" opacity="0.4" font-family="serif">ᚱ</text>
+        </svg>
+      </div>
+
+      <div class="form-group">
+        <label>Nom de l'ennemi</label>
+        <input type="text" id="enemy-name" value="Morthax le Dévastateur" placeholder="Nom de l'ennemi">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Points de vie</label>
+          <input type="number" id="enemy-hp" value="120" min="10" max="999">
+        </div>
+        <div class="form-group">
+          <label>Attaque</label>
+          <input type="number" id="enemy-atk" value="25" min="1" max="999">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mana</label>
+        <input type="number" id="enemy-mana" value="80" min="0" max="999">
+      </div>
+    </div>
+
+  </div><!-- .setup-arena -->
+
+  <div class="fight-btn-wrap">
+    <button class="btn-fight" onclick="setupFight()">⚔ &nbsp; COMBATTRE &nbsp; ⚔</button>
+  </div>
+
+</section>
+
+<!-- ============================================================
+     SCREEN 2 — BATTLE
+     ============================================================ -->
+<section id="screen-battle" class="screen">
+
+  <div class="battle-header">
+    Chroniques du Combat — Tour <span id="tour-num">1</span>
+  </div>
+
+  <div class="combatants">
+
+    <!-- Player combatant -->
+    <div class="combatant player-side">
+      <div class="combatant-name" id="b-player-name">Valdris</div>
+      <div class="combatant-silhouette" id="player-sil">
+        <svg width="80" height="120" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="45" cy="18" rx="12" ry="14" fill="#c9a84c" opacity="0.85"/>
+          <polygon points="35,10 45,2 55,10 50,12 45,6 40,12" fill="#f0d080" opacity="0.9"/>
+          <rect x="30" y="32" width="30" height="36" rx="3" fill="#8a7040" opacity="0.9"/>
+          <ellipse cx="45" cy="44" rx="12" ry="10" fill="#c9a84c" opacity="0.6"/>
+          <rect x="28" y="64" width="34" height="6" rx="2" fill="#5a3a10" opacity="0.95"/>
+          <rect x="16" y="33" width="13" height="32" rx="5" fill="#8a7040" opacity="0.85"/>
+          <rect x="61" y="33" width="13" height="32" rx="5" fill="#8a7040" opacity="0.85"/>
+          <rect x="74" y="18" width="5" height="55" rx="2" fill="#d0d8e0" opacity="0.9"/>
+          <polygon points="74,18 79,18 76.5,8" fill="#e0e8f0" opacity="0.95"/>
+          <rect x="70" y="42" width="13" height="4" rx="2" fill="#c9a84c" opacity="0.9"/>
+          <ellipse cx="10" cy="52" rx="9" ry="12" fill="#5a3a10" opacity="0.9"/>
+          <ellipse cx="10" cy="52" rx="6" ry="9" fill="#8b1a1a" opacity="0.7"/>
+          <line x1="10" y1="43" x2="10" y2="61" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+          <line x1="4" y1="52" x2="16" y2="52" stroke="#c9a84c" stroke-width="1.5" opacity="0.8"/>
+          <rect x="30" y="70" width="13" height="44" rx="5" fill="#5a4820" opacity="0.9"/>
+          <rect x="47" y="70" width="13" height="44" rx="5" fill="#5a4820" opacity="0.9"/>
+          <rect x="28" y="106" width="17" height="12" rx="3" fill="#2a1e0e" opacity="0.95"/>
+          <rect x="45" y="106" width="17" height="12" rx="3" fill="#2a1e0e" opacity="0.95"/>
+          <ellipse cx="36" cy="90" rx="7" ry="5" fill="#c9a84c" opacity="0.5"/>
+          <ellipse cx="53" cy="90" rx="7" ry="5" fill="#c9a84c" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="bars">
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>Vie</span>
+            <span class="bar-val"><span id="p-hp-val">100</span> / <span id="p-hp-max">100</span></span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill hp-fill" id="p-hp-bar" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>Mana</span>
+            <span class="bar-val"><span id="p-mana-val">100</span> / <span id="p-mana-max">100</span></span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill mana-fill" id="p-mana-bar" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enemy combatant -->
+    <div class="combatant enemy-side">
+      <div class="combatant-name" id="b-enemy-name">Morthax</div>
+      <div class="combatant-silhouette" id="enemy-sil">
+        <svg width="80" height="120" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:scaleX(-1)">
+          <ellipse cx="45" cy="18" rx="13" ry="15" fill="#5a1010" opacity="0.9"/>
+          <ellipse cx="45" cy="18" rx="10" ry="12" fill="#8b2020" opacity="0.6"/>
+          <path d="M34 10 Q28 2 32 -2 Q36 4 38 10" fill="#3a0a0a" opacity="0.9"/>
+          <path d="M56 10 Q62 2 58 -2 Q54 4 52 10" fill="#3a0a0a" opacity="0.9"/>
+          <ellipse cx="40" cy="17" rx="4" ry="3" fill="#ff2020" opacity="0.7"/>
+          <ellipse cx="50" cy="17" rx="4" ry="3" fill="#ff2020" opacity="0.7"/>
+          <path d="M22 35 Q30 30 45 32 Q60 30 68 35 L72 110 Q60 115 45 114 Q30 115 18 110 Z" fill="#1a0808" opacity="0.95"/>
+          <path d="M28 35 Q36 40 45 38 Q54 40 62 35" stroke="#5a1010" stroke-width="1.5" fill="none" opacity="0.8"/>
+          <polygon points="22,35 16,25 20,38" fill="#3a0a0a" opacity="0.9"/>
+          <polygon points="68,35 74,25 70,38" fill="#3a0a0a" opacity="0.9"/>
+          <rect x="66" y="15" width="5" height="60" rx="2" fill="#2a0a0a" opacity="0.95"/>
+          <path d="M66 15 Q80 20 78 35 Q70 30 66 35" fill="#1a0505" opacity="0.9"/>
+          <rect x="62" y="40" width="14" height="4" rx="2" fill="#5a1010" opacity="0.9"/>
+          <path d="M28 100 L24 130 Q30 132 36 130 L38 100" fill="#120606" opacity="0.95"/>
+          <path d="M52 100 L54 130 Q60 132 66 130 L62 100" fill="#120606" opacity="0.95"/>
+          <rect x="12" y="38" width="13" height="30" rx="5" fill="#1a0808" opacity="0.9"/>
+          <rect x="65" y="38" width="13" height="30" rx="5" fill="#1a0808" opacity="0.9"/>
+          <text x="45" y="75" font-size="18" text-anchor="middle" fill="#ff4040" opacity="0.4" font-family="serif">ᚱ</text>
+        </svg>
+      </div>
+      <div class="bars">
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>Vie</span>
+            <span class="bar-val"><span id="e-hp-val">120</span> / <span id="e-hp-max">120</span></span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill hp-fill" id="e-hp-bar" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-label">
+            <span>Mana</span>
+            <span class="bar-val"><span id="e-mana-val">80</span> / <span id="e-mana-max">80</span></span>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill mana-fill" id="e-mana-bar" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .combatants -->
+
+  <div class="turn-indicator" id="turn-indicator">Votre tour — choisissez une action</div>
+
+  <div class="actions">
+    <button class="btn-action btn-attack" id="btn-attack" onclick="playerAttack()">⚔ Attaquer</button>
+    <button class="btn-action btn-heal"   id="btn-heal"   onclick="playerHeal()">✨ Se soigner <small style="font-size:0.7em;opacity:0.7">(25 mana)</small></button>
+  </div>
+
+  <div class="log-section">
+    <div class="log-header">📜 Chroniques du Combat</div>
+    <div class="log-scroll" id="log-scroll"></div>
+  </div>
+
+</section>
+
+<!-- ============================================================
+     SCREEN 3 — VICTORY / DEFEAT
+     ============================================================ -->
+<section id="screen-victory" class="screen">
+
+  <div id="result-title" class="result-title victory-text">VICTOIRE !</div>
+
+  <div class="rune-divider"><span>✦ ᚠ ᚢ ᚦ ✦</span></div>
+
+  <div class="result-winner" id="result-winner">Valdris l'Implacable triomphe</div>
+
+  <div class="result-stats">
+    <div class="stat-item">
+      <span class="stat-value" id="stat-tours">0</span>
+      <span class="stat-label">Tours de combat</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="stat-hp">0</span>
+      <span class="stat-label">PV restants</span>
+    </div>
+  </div>
+
+  <button class="btn-replay" onclick="resetGame()">↺ &nbsp; Rejouer</button>
+
+</section>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ── State ─────────────────────────────────────────────────── */
+const state = {
+  player: { nom:'', sante:0, santeMax:0, attaque:0, mana:0, manaMax:0 },
+  enemy:  { nom:'', sante:0, santeMax:0, attaque:0, mana:0, manaMax:0 },
+  tour: 0,
+  log: [],
+  locked: false   // prevent double-clicks during enemy turn
+};
+
+/* ── Screen management ─────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ── Setup ─────────────────────────────────────────────────── */
+function setupFight() {
+  const playerName = document.getElementById('player-name').value.trim() || 'Héros';
+  const enemyName  = document.getElementById('enemy-name').value.trim()  || 'Ennemi';
+  const playerHp   = Math.max(1, parseInt(document.getElementById('player-hp').value)   || 100);
+  const playerAtk  = Math.max(1, parseInt(document.getElementById('player-atk').value)  || 30);
+  const playerMana = Math.max(0, parseInt(document.getElementById('player-mana').value) || 100);
+  const enemyHp    = Math.max(1, parseInt(document.getElementById('enemy-hp').value)    || 120);
+  const enemyAtk   = Math.max(1, parseInt(document.getElementById('enemy-atk').value)   || 25);
+  const enemyMana  = Math.max(0, parseInt(document.getElementById('enemy-mana').value)  || 80);
+
+  state.player = { nom: playerName, sante: playerHp, santeMax: playerHp, attaque: playerAtk, mana: playerMana, manaMax: playerMana };
+  state.enemy  = { nom: enemyName,  sante: enemyHp,  santeMax: enemyHp,  attaque: enemyAtk,  mana: enemyMana,  manaMax: enemyMana };
+  state.tour   = 1;
+  state.log    = [];
+  state.locked = false;
+
+  // Update battle screen names & bars
+  document.getElementById('b-player-name').textContent = playerName;
+  document.getElementById('b-enemy-name').textContent  = enemyName;
+
+  document.getElementById('p-hp-max').textContent   = playerHp;
+  document.getElementById('p-mana-max').textContent  = playerMana;
+  document.getElementById('e-hp-max').textContent    = enemyHp;
+  document.getElementById('e-mana-max').textContent  = enemyMana;
+
+  document.getElementById('log-scroll').innerHTML = '';
+  setTurnIndicator('player');
+  updateBars();
+  updateTourNum();
+
+  addLog(`Le combat commence entre ${playerName} et ${enemyName} !`, 'info');
+
+  showScreen('screen-battle');
+}
+
+/* ── Bar update ────────────────────────────────────────────── */
+function updateBars() {
+  const p = state.player;
+  const e = state.enemy;
+
+  const pHpPct   = Math.max(0, (p.sante / p.santeMax) * 100);
+  const pManaPct = p.manaMax > 0 ? Math.max(0, (p.mana / p.manaMax) * 100) : 0;
+  const eHpPct   = Math.max(0, (e.sante / e.santeMax) * 100);
+  const eManaPct = e.manaMax > 0 ? Math.max(0, (e.mana / e.manaMax) * 100) : 0;
+
+  document.getElementById('p-hp-bar').style.width   = pHpPct + '%';
+  document.getElementById('p-mana-bar').style.width  = pManaPct + '%';
+  document.getElementById('e-hp-bar').style.width   = eHpPct + '%';
+  document.getElementById('e-mana-bar').style.width  = eManaPct + '%';
+
+  document.getElementById('p-hp-val').textContent   = Math.max(0, p.sante);
+  document.getElementById('p-mana-val').textContent  = p.mana;
+  document.getElementById('e-hp-val').textContent   = Math.max(0, e.sante);
+  document.getElementById('e-mana-val').textContent  = e.mana;
+
+  // Low HP warning
+  const pBar = document.getElementById('p-hp-bar');
+  const eBar = document.getElementById('e-hp-bar');
+  pHpPct <= 25 ? pBar.classList.add('low') : pBar.classList.remove('low');
+  eHpPct <= 25 ? eBar.classList.add('low') : eBar.classList.remove('low');
+
+  // Heal button state
+  document.getElementById('btn-heal').disabled = p.mana < 25;
+}
+
+/* ── Log ───────────────────────────────────────────────────── */
+function addLog(message, type = 'info') {
+  const scroll = document.getElementById('log-scroll');
+  const line = document.createElement('div');
+  line.className = 'log-line ' + type;
+
+  const tourSpan = document.createElement('span');
+  tourSpan.className = 'turn-num';
+  tourSpan.textContent = `[T${state.tour}]`;
+
+  line.appendChild(tourSpan);
+  line.appendChild(document.createTextNode(' ' + message));
+  scroll.appendChild(line);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+/* ── Shake animation ───────────────────────────────────────── */
+function triggerShake(elementId) {
+  const el = document.getElementById(elementId);
+  el.classList.remove('hit');
+  void el.offsetWidth; // reflow
+  el.classList.add('hit');
+  el.addEventListener('animationend', () => el.classList.remove('hit'), { once: true });
+}
+
+/* ── Turn indicator ────────────────────────────────────────── */
+function setTurnIndicator(who) {
+  const el = document.getElementById('turn-indicator');
+  if (who === 'player') {
+    el.textContent = 'Votre tour — choisissez une action';
+    el.classList.remove('enemy-turn');
+  } else {
+    el.textContent = `Tour de ${state.enemy.nom}...`;
+    el.classList.add('enemy-turn');
+  }
+}
+
+function updateTourNum() {
+  document.getElementById('tour-num').textContent = state.tour;
+}
+
+/* ── Lock / unlock actions ─────────────────────────────────── */
+function lockActions() {
+  state.locked = true;
+  document.getElementById('btn-attack').disabled = true;
+  document.getElementById('btn-heal').disabled   = true;
+}
+
+function unlockActions() {
+  state.locked = false;
+  document.getElementById('btn-attack').disabled = false;
+  // heal button state depends on mana
+  document.getElementById('btn-heal').disabled = state.player.mana < 25;
+}
+
+/* ── Damage calculation (small random variance) ────────────── */
+function calcDamage(attaque) {
+  const variance = Math.floor(attaque * 0.15); // ±15%
+  const min = Math.max(1, attaque - variance);
+  const max = attaque + variance;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/* ── Player actions ────────────────────────────────────────── */
+function playerAttack() {
+  if (state.locked) return;
+  lockActions();
+  setTurnIndicator('enemy');
+
+  const dmg = calcDamage(state.player.attaque);
+  state.enemy.sante -= dmg;
+
+  triggerShake('enemy-sil');
+  updateBars();
+
+  const isCrit = dmg > state.player.attaque;
+  if (isCrit) {
+    addLog(`⚔ ${state.player.nom} frappe ${state.enemy.nom} pour ${dmg} dégâts ! (Coup puissant !)`, 'attack');
+  } else {
+    addLog(`⚔ ${state.player.nom} attaque ${state.enemy.nom} pour ${dmg} dégâts.`, 'attack');
+  }
+
+  if (checkVictory()) return;
+  setTimeout(enemyTurn, 900);
+}
+
+function playerHeal() {
+  if (state.locked || state.player.mana < 25) return;
+  lockActions();
+  setTurnIndicator('enemy');
+
+  const healAmount = Math.floor(state.player.santeMax * 0.25);
+  state.player.mana -= 25;
+  state.player.sante = Math.min(state.player.santeMax, state.player.sante + healAmount);
+
+  updateBars();
+  addLog(`✨ ${state.player.nom} canalise ses arcanes et récupère ${healAmount} PV. (-25 mana)`, 'heal');
+
+  setTimeout(enemyTurn, 900);
+}
+
+/* ── Enemy turn ────────────────────────────────────────────── */
+function enemyTurn() {
+  state.tour++;
+  updateTourNum();
+
+  const e = state.enemy;
+  const p = state.player;
+
+  // 25% chance to heal if possible
+  const wantsToHeal = Math.random() < 0.25 && e.mana >= 25 && e.sante < e.santeMax;
+
+  if (wantsToHeal) {
+    const healAmount = Math.floor(e.santeMax * 0.2);
+    e.mana   -= 25;
+    e.sante   = Math.min(e.santeMax, e.sante + healAmount);
+    addLog(`✨ ${e.nom} puise dans les ténèbres et régénère ${healAmount} PV. (-25 mana)`, 'heal');
+  } else {
+    const dmg = calcDamage(e.attaque);
+    p.sante -= dmg;
+    triggerShake('player-sil');
+    addLog(`☠ ${e.nom} frappe ${p.nom} pour ${dmg} dégâts !`, 'enemy-attack');
+  }
+
+  updateBars();
+
+  if (checkVictory()) return;
+
+  setTurnIndicator('player');
+  unlockActions();
+}
+
+/* ── Victory check ─────────────────────────────────────────── */
+function checkVictory() {
+  if (state.enemy.sante <= 0) {
+    addLog(`✦ ${state.player.nom} a terrassé ${state.enemy.nom} ! La victoire est sienne !`, 'victory');
+    setTimeout(() => showVictory(state.player, true), 1200);
+    return true;
+  }
+  if (state.player.sante <= 0) {
+    addLog(`✦ ${state.player.nom} est tombé... ${state.enemy.nom} règne sur les ténèbres.`, 'victory');
+    setTimeout(() => showVictory(state.enemy, false), 1200);
+    return true;
+  }
+  return false;
+}
+
+/* ── Show victory screen ───────────────────────────────────── */
+function showVictory(winner, isPlayerWin) {
+  const titleEl   = document.getElementById('result-title');
+  const winnerEl  = document.getElementById('result-winner');
+  const toursEl   = document.getElementById('stat-tours');
+  const hpEl      = document.getElementById('stat-hp');
+
+  if (isPlayerWin) {
+    titleEl.textContent = 'VICTOIRE !';
+    titleEl.className   = 'result-title victory-text';
+    winnerEl.textContent = `${winner.nom} triomphe dans la gloire`;
+    hpEl.textContent     = Math.max(0, winner.sante);
+  } else {
+    titleEl.textContent = 'DÉFAITE...';
+    titleEl.className   = 'result-title defeat-text';
+    winnerEl.textContent = `${winner.nom} règne sur les ruines`;
+    hpEl.textContent     = Math.max(0, winner.sante);
+  }
+
+  toursEl.textContent = state.tour;
+
+  // Reset animations by cloning
+  const clone = titleEl.cloneNode(true);
+  titleEl.parentNode.replaceChild(clone, titleEl);
+
+  showScreen('screen-victory');
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+function resetGame() {
+  showScreen('screen-setup');
+}
+</script>
+</body>
+</html>
