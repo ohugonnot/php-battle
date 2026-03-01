@@ -1,28 +1,123 @@
-# PHP Battle
+# PHP Battle — Solution
 
-Exercice pédagogique conçu et donné à mes étudiants lors de mon activité de formateur développeur web.
+Correction de l'exercice POO PHP. Ce README présente **deux approches** pour résoudre le même problème, de la plus simple à la plus structurée.
 
-**Objectif** : découvrir la POO PHP de façon ludique via un jeu de combat de personnages tour par tour.
+> La branche `exercice` contient le point de départ si tu veux faire l'exercice toi-même avant de lire la correction.
 
-## Comment utiliser ce repo
+---
 
-| Branche | Contenu |
-|---------|---------|
-| [`exercice`](../../tree/exercice) | Point de départ : interface fournie, classes à créer |
-| [`solution`](../../tree/solution) | Correction complète avec persistance BDD et statistiques |
+## Approche 1 — Procédurale (sans classe)
 
-> Commence par la branche `exercice`, consulte `solution` uniquement si tu es bloqué.
+La version la plus directe : des fonctions PHP qui manipulent des tableaux.
 
-## L'exercice en bref
+**Fichiers :** `lib.php`, `index.php`
 
-L'interface de combat est fournie (`index.php`, `navbar.php`). Tu dois créer :
+```php
+// Un personnage = un tableau PHP
+$player = [
+    "name"   => "Héros",
+    "sante"  => 100,
+    "attaque" => 30,
+    "mana"   => 100,
+];
 
-- **`Personnage`** — propriétés (nom, PV, attaque, mana), méthodes (`attaquer()`, `recevoirDegats()`, `estVivant()`)
-- La logique de **combat tour par tour** jusqu'à ce qu'un personnage tombe à 0 PV
-- **Bonus** : persister les personnages et les stats en base de données
+// Une action = une fonction globale
+function attaque(): void
+{
+    [$player, $adversaire, $combats] = getInfoInSession();
+    $adversaire['sante'] = max(0, $adversaire['sante'] - $player["attaque"]);
+    $combats[] = $player["name"] . " attaque et inflige " . $player["attaque"] . " dégâts.";
+    saveState($player, $adversaire, $combats);
+}
+```
 
-## Stack
+**Ce que ça fait bien :** simple à lire, peu de code, fonctionne.
 
-- PHP 8 — POO
-- MySQL / PDO pour la persistance (bonus)
-- Composer pour l'autoloading
+**Ce que ça fait mal :**
+- Les données (`$player["sante"]`) et les actions (`attaque()`) sont séparées — aucun lien entre les deux
+- Si on veut ajouter un deuxième type de personnage (magicien, guerrier...), il faut dupliquer les fonctions
+- Impossible de réutiliser ce code dans un autre projet sans tout embarquer
+
+---
+
+## Approche 2 — Orientée objet (avec classe)
+
+On regroupe les données **et** les actions dans une classe.
+
+**Fichier :** `Personnage.php`
+
+```php
+class Personnage
+{
+    public string $nom;
+    public int $sante;
+    public int $attaque;
+    public int $mana;
+
+    public function __construct(string $nom, int $sante, int $attaque, int $mana)
+    {
+        $this->nom     = $nom;
+        $this->sante   = $sante;
+        $this->attaque = $attaque;
+        $this->mana    = $mana;
+    }
+
+    // L'action est dans la classe — elle sait elle-même comment attaquer
+    public function attaquer(Personnage $cible): string
+    {
+        $cible->recevoirDegats($this->attaque);
+        return $this->nom . " attaque " . $cible->nom . " et lui inflige " . $this->attaque . " dégâts.";
+    }
+
+    public function recevoirDegats(int $degats): void
+    {
+        $this->sante = max(0, $this->sante - $degats);
+    }
+
+    public function estVivant(): bool
+    {
+        return $this->sante > 0;
+    }
+}
+
+// Utilisation
+$hero = new Personnage("Héros", 100, 30, 100);
+$ennemi = new Personnage("Gobelin", 60, 15, 0);
+
+while ($hero->estVivant() && $ennemi->estVivant()) {
+    echo $hero->attaquer($ennemi) . "\n";
+    if ($ennemi->estVivant()) {
+        echo $ennemi->attaquer($hero) . "\n";
+    }
+}
+
+echo $hero->estVivant() ? $hero->nom . " gagne !" : $ennemi->nom . " gagne !";
+```
+
+**Ce que la POO apporte ici :**
+
+| Problème procédural | Solution POO |
+|---------------------|--------------|
+| Données et actions séparées | Tout est dans la classe |
+| `$player["sante"]` — aucune garantie sur le type | `$personnage->sante` — typé `int` |
+| Impossible de faire `$player->soigner()` | `$hero->soigner()` — l'objet sait se soigner |
+| Ajouter un Magicien = copier toutes les fonctions | `class Magicien extends Personnage` — on hérite |
+
+---
+
+## Fichiers de la solution complète
+
+```
+Personnage.php      ← classe POO (approche 2)
+lib.php             ← fonctions procédurales (approche 1)
+index.php           ← interface web, utilise lib.php
+repository.php      ← persistance BDD (PDO)
+statistiques.php    ← stats des combats
+```
+
+## Lancer le projet
+
+```bash
+composer install
+php -S localhost:8000
+```
